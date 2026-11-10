@@ -4,6 +4,9 @@
 
 ## 도구
 
+- **특수문자**: 분류·검색, 클릭 복사, 모아 쓰기, Windows/Mac 단축키 안내
+- **인스타 폰트**: 12가지 유니코드 영문 스타일, 한글·이모지 유지
+
 - **WebP 변환**: WebP → JPG/PNG, 여러 파일 순차 변환, 이미지 URL 불러오기
 - **HEIC 변환**: HEIC/HEIF → JPG/PNG, 브라우저 내부 처리
 - **Path Converter**: Windows UNC ↔ Mac SMB/AFP 경로 자동 변환, 결과 복사
