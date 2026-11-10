@@ -9,3 +9,10 @@ test('ISO year boundaries and 53-week years',()=>{const r=isoWeek(civilDate(2021
 test('Invalid inputs fail without guessing',()=>{for(const q of ['0주차','54주차','2027-02-29','2월 30일','안녕','내년2028년추석','2051년추석','2101-01-01'])assert.throws(()=>searchWeek(q,today),q);assert.equal(dateKey(searchWeek('2028-02-29',today).date),'2028-02-29')});
 test('Relative years and days follow Korea current year',()=>{assert.equal(dateKey(searchWeek('내일',today).date),'2026-11-11');assert.equal(dateKey(searchWeek('작년 크리스마스',today).date),'2025-12-25');assert.equal(dateKey(searchWeek('내후년 12월 23일',today).date),'2028-12-23');assert.equal(dateKey(searchWeek('다음 주',today).date),'2026-11-17')});
 test('Every ISO week round trips for 1900–2100',()=>{for(let y=1900;y<=2100;y++)for(let w=1;w<=weeksInYear(y);w++){const r=isoWeek(fromWeek(y,w));assert.equal(r.year,y);assert.equal(r.week,w);assert.equal(r.start.getUTCDay(),1);assert.equal(r.end.getUTCDay(),0)}});
+test('short and full year inputs, Unicode normalization',()=>{
+ for(const q of ['27년 1주차','2027년 1주차','２０２７년 １주차','2027년\u200b 1주차']){
+  const r=searchWeek(q,today);assert.equal(dateKey(r.start),'2027-01-04');assert.equal(dateKey(r.end),'2027-01-10');
+ }
+ for(const q of ['26-07-30','26/7/30','26.07.30','2026-07-30'])assert.equal(dateKey(searchWeek(q,today).date),'2026-07-30');
+ assert.throws(()=>searchWeek('27-02-29',today));
+});
