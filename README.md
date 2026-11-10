@@ -1,25 +1,39 @@
-# Image Pocket
+# Pocket Utility
 
-브라우저에서 HEIC/HEIF, WebP, JPG, PNG 이미지를 변환하는 도구입니다.
+회원가입 없이 사용하는 한국어 유틸리티 모음입니다.
 
-- FROM: 자동 감지 / HEIC·HEIF / WebP / JPG / PNG
-- TO: JPG / PNG / WebP
-- 드래그 앤 드롭, 여러 파일 순차 변환, 품질 설정, 다운로드
-- 사용자 이미지는 서버로 전송하지 않습니다.
+## 도구
 
-## 개발
+- **WebP 변환**: WebP → JPG/PNG, 여러 파일 순차 변환, 이미지 URL 불러오기
+- **HEIC 변환**: HEIC/HEIF → JPG/PNG, 브라우저 내부 처리
+- **위크넘버**: 한국 시간 기준 오늘의 ISO 주차, 한국어 날짜·기념일 검색, 월~일 기간, 연간 주차 달력
 
-Node.js 22 이상에서 `npm install` 후 `npm run build`를 실행합니다. 생성된 `dist`가 배포 파일입니다.
+위크넘버 검색 예: `52주차`, `12월 23일`, `2027-12-23`, `크리스마스`, `내년 추석`, `작년 설날`, `2027년 3주차`, `다음 주`.
+연도를 생략하면 한국 시간 기준 올해를 사용합니다. ISO 주차는 월요일 시작, 1월 4일이 포함된 주가 1주차입니다. 연말·연초에는 달력 연도와 ISO 주차 연도가 다를 수 있습니다.
 
-- `src/App.tsx`: 화면과 변환 로직
-- `src/styles.css`: 디자인
-- `scripts/build.mjs`: 정적 빌드
-- `.github/workflows/pages.yml`: main 업데이트 시 GitHub Pages 자동 배포
+양력 조회 범위: 1900~2100년. 음력 기념일: 1900~2050년. 지원하지 않는 자연어는 추측하지 않습니다. 설·추석의 전날/당일/다음날만 표시하며, 대체·임시공휴일을 계산하지 않습니다.
 
-GitHub Settings → Pages → Source를 GitHub Actions로 설정하세요.
+## 이미지 링크와 개인정보
 
-## 지원 범위
+로컬 파일은 서버에 업로드하지 않습니다. URL 이미지는 원본 서버에 직접 요청합니다. 해당 서버가 CORS를 허용해야 합니다. 나무위키 이미지처럼 CORS를 차단한 링크는 파일을 저장해 추가해야 합니다. 이미지 중계 서버는 연결하지 않았습니다.
 
-HEIC 최초 변환 시 jsDelivr에서 heic-to 1.6.7 디코더를 불러오므로 인터넷 연결이 필요합니다. 사진은 전송하지 않습니다. EXIF 등 메타데이터와 Live Photo 동영상은 보존하지 않습니다. 애니메이션 WebP는 지원하지 않습니다. 최대 40메가픽셀 검사는 디코딩 후에 적용됩니다. 매우 큰 원본은 기기 메모리를 많이 사용할 수 있습니다.
+HEIC 최초 사용 시 jsDelivr에서 heic-to 1.6.7을 로드합니다. EXIF와 Live Photo 동영상은 유지되지 않습니다. 애니메이션 WebP는 지원하지 않습니다. 40메가픽셀 검사는 디코딩 후에 적용됩니다.
 
-HEIC 실제 파일 및 브라우저별 호환성 검증은 추가로 필요합니다.
+## 개발 및 배포
+
+Node.js 22 이상: `npm install`, `npm test`, `npm run build`.
+GitHub `main` 업데이트 시 자동으로 테스트 → 빌드 → Pages 배포를 실행합니다.
+Hash URL을 사용하므로 저장소 이름을 바꿔도 소스 경로를 수정할 필요가 없습니다.
+
+- `src/App.tsx`: 도구 모음, 한국어 위크넘버, 달력
+- `src/Converter.tsx`: 이미지 변환 및 링크 가져오기
+- `src/week.mjs`: 한국 시간, ISO 주차, 한국어 검색, 음력 기념일
+- `src/styles.css`: 반응형 UI
+- `tests/week.test.mjs`: 날짜 경계 및 기념일 검증
+- `vendor/korean-lunar-calendar`: 0.4.0 원본 변환기와 MIT 라이선스
+
+## 날짜 검증 자료
+
+2027년 추석(9/15), 설날(2/7), 정월대보름(2/21), 단오(6/9)를 [우주항공청 2027년 월력요항](https://www.kasa.go.kr/prog/plcyBrf/brief/kor/sub01_01_04/view.do?plcyBrfNo=431)과 대조한 테스트를 포함합니다.
+
+음력 변환: [korean-lunar-calendar](https://github.com/usingsky/korean_lunar_calendar_js), MIT. 한국천문연구원 기준 한국 음력 변환표를 사용하며, 해당 패키지의 지원 범위를 넘는 날짜는 거부합니다.
