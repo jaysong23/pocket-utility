@@ -1,4 +1,4 @@
-# WebP Pocket
+# Image Pocket
 
 브라우저에서 HEIC/HEIF, WebP, JPG, PNG 이미지를 변환하는 도구입니다.
 
