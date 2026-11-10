@@ -21,3 +21,12 @@ test('web URLs and multiple paths are rejected',()=>{
  assert.throws(()=>convertPath('file:///Users/name'));
  assert.throws(()=>convertPath('smb://a/b\nsmb://c/d'));
 });
+test('custom protocols normalize and round trip without opening links',()=>{
+ const unc='\\\\NAS\\공유 폴더';
+ for(const protocol of ['nfs','NFS://','my-app+v1.2']){
+  const forward=convertPath(unc,'custom',protocol);
+  assert.equal(convertPath(forward.output,'custom',protocol).output,unc);
+ }
+ assert.equal(convertPath(unc,'custom','NFS://').output,'nfs://NAS/공유 폴더');
+ for(const invalid of ['', '1nfs','nfs/path','nfs host'])assert.throws(()=>convertPath(unc,'custom',invalid));
+});
