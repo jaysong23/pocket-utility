@@ -1,3 +1,4 @@
+import {t} from './i18n.mjs';
 export const guides={
   "webp": [
     "WebP JPG·PNG 변환",
@@ -119,18 +120,18 @@ export const guides={
     "공인 표준시와 정확히 같은가요?",
     "외부 시간 서비스와 동기화하지만 공인 시각 인증 서비스는 아닙니다. 네트워크 지연이나 동기화 실패에 영향을 받을 수 있습니다. 알림과 미니 창은 브라우저 권한 및 지원 여부에 따라 달라집니다."
   ],
-  "md-to-html": [
-    "마크다운 HTML 변환",
-    "마크다운 파일을 실시간 미리보기로 확인하고 본문 또는 스타일 포함 HTML로 복사·저장하세요.",
+  "markdown": [
+    "마크다운 변환",
+    "마크다운 파일을 미리 보고 HTML 또는 일반 텍스트로 복사·저장하세요.",
     [
       "마크다운을 입력하거나 .md 파일을 불러옵니다.",
       "미리보기와 HTML 코드 탭에서 결과를 확인합니다.",
-      "본문 또는 완성형 HTML을 선택해 복사·다운로드합니다."
+      "HTML 또는 일반 텍스트를 선택해 복사·다운로드합니다."
     ],
-    "표와 체크리스트가 있는 메모를 독립된 HTML 문서로 공유할 수 있습니다.",
+    "표와 체크리스트가 있는 메모를 HTML 문서나 일반 텍스트로 공유할 수 있습니다.",
     "스크립트나 이미지도 포함되나요?",
     "스크립트와 이벤트 속성, 사용자 CSS는 제거됩니다. 이미지는 파일에 내장하지 않고 원본 주소로 연결합니다. 미리보기에서 외부 이미지 표시를 허용하면 해당 서버에 요청합니다."
   ]
 };
 export const escapeHTML=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-export function guideHTML(id){const g=guides[id];if(!g)return '';return '<section class="tool-guide" aria-label="사용법과 자주 묻는 질문"><h2>'+escapeHTML(g[0])+' 사용법</h2><p>'+escapeHTML(g[1])+'</p><ol>'+g[2].map(s=>'<li>'+escapeHTML(s)+'</li>').join('')+'</ol><h3>이렇게 활용하세요</h3><p>'+escapeHTML(g[3])+'</p><details><summary>'+escapeHTML(g[4])+'</summary><p>'+escapeHTML(g[5])+'</p></details></section>'}
+export function guideHTML(id,lang='ko'){const original=guides[id];const g=original?.map(v=>Array.isArray(v)?v.map(s=>t(s,lang)):t(v,lang));if(!g)return '';return '<section class="tool-guide" aria-label="' + t('사용법과 자주 묻는 질문',lang) + '"><h2>'+escapeHTML(g[0])+' · '+t('사용법',lang)+'</h2><p>'+escapeHTML(g[1])+'</p><ol>'+g[2].map(s=>'<li>'+escapeHTML(s)+'</li>').join('')+'</ol><h3>'+t('이렇게 활용하세요',lang)+'</h3><p>'+escapeHTML(g[3])+'</p><details><summary>'+escapeHTML(g[4])+'</summary><p>'+escapeHTML(g[5])+'</p></details></section>'}

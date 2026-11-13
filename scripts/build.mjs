@@ -1,24 +1,31 @@
 import {build} from 'esbuild';
-import {mkdir,readFile,writeFile,rm} from 'node:fs/promises';
+import {mkdir,readFile,writeFile,rm,cp} from 'node:fs/promises';
 import {guides,guideHTML,escapeHTML as esc} from '../src/guides.mjs';
-const raw=process.env.SITE_URL||(process.env.CF_PAGES_URL?process.env.CF_PAGES_URL:'https://jaysong23.github.io/pocket-utility/');
+import {t,languages} from '../src/i18n.mjs';
+import {pageMeta,pagePath,structuredData} from '../src/seo.mjs';
+const raw=process.env.SITE_URL||process.env.CF_PAGES_URL||'https://jaysong23.github.io/pocket-utility/';
 const site=new URL(raw);if(!['http:','https:'].includes(site.protocol)||site.search||site.hash)throw Error('SITE_URL must be an HTTP(S) site root without query or hash');
 site.pathname=site.pathname.replace(/\/?$/,'/');const base=site.pathname;
 await rm('dist',{recursive:true,force:true});await mkdir('dist',{recursive:true});
 await build({entryPoints:['src/main.tsx'],bundle:true,minify:true,jsx:'automatic',define:{'process.env.NODE_ENV':'"production"'},outdir:'dist',entryNames:'entry'});
-const template=await readFile('index.html','utf8');
-const routes=['',...Object.keys(guides)];
-const description='이미지 변환, 날짜와 주차 검색, 텍스트 도구와 계산기를 한곳에서 사용하세요.';
-for(const route of routes){
- const g=guides[route],title=(g?.[0]||'작고 편리한 온라인 도구')+' | Pocket Utility',desc=g?.[1]||description,url=new URL(route?route+'/':'',site).href;
- const nav='<nav aria-label="도구 목록"><a href="'+base+'">모든 도구</a>'+Object.entries(guides).map(([id,v])=>'<a href="'+base+id+'/">'+esc(v[0])+'</a>').join('')+'</nav>';
- const initial='<div class="static-intro">'+nav+'<h1>'+esc(title)+'</h1><p>'+esc(desc)+'</p><noscript>변환 기능은 자바스크립트를 켜야 사용할 수 있습니다.</noscript>'+guideHTML(route)+'</div>';
- let html=template.replace(/<title>.*?<\/title>/,'<title>'+esc(title)+'</title>').replace(/<meta name="description" content="[^"]*">/,'<meta name="description" content="'+esc(desc)+'">').replace('href="entry.css"','href="'+base+'entry.css"').replace('src="entry.js"','src="'+base+'entry.js"').replace('<div id="root"></div>','<div id="root">'+initial+'</div>');
- html=html.replace('</head>','<meta name="site-base" content="'+esc(base)+'"><link rel="canonical" href="'+esc(url)+'"><meta property="og:type" content="website"><meta property="og:title" content="'+esc(title)+'"><meta property="og:description" content="'+esc(desc)+'"><meta property="og:url" content="'+esc(url)+'"></head>');
- const dir='dist'+(route?'/'+route:'');await mkdir(dir,{recursive:true});await writeFile(dir+'/index.html',html);
+const template=await readFile('index.html','utf8'),routes=['',...Object.keys(guides)];
+const categorySets=[['이미지',['webp','heic','pdf-to-jpg']],['날짜·시간',['weeknumber','clock-timer']],['텍스트·경로',['path-converter','symbols','insta-fonts','markdown']],['계산·변환',['currency','units']]];
+for(const lang of languages)for(const route of routes){
+ const m=pageMeta(route,lang,site),href=id=>base+pagePath(id,lang),g=guides[route];
+ const nav='<nav class="category-nav" aria-label="'+esc(t('주요 메뉴',lang))+'"><a href="'+href('')+'">'+esc(t('모든 도구',lang))+'</a>'+categorySets.map(([cat,ids])=>'<details><summary>'+esc(t(cat,lang))+'</summary><div class="category-dropdown">'+ids.map(id=>'<a href="'+href(id)+'">'+esc(t(guides[id][0],lang))+'</a>').join('')+'</div></details>').join('')+'</nav>';
+ const languageLinks='<nav aria-label="Language">'+languages.map(l=>'<a href="'+base+pagePath(route,l)+'" lang="'+l+'" hreflang="'+l+'">'+({ko:'한국어',en:'English',ja:'日本語'}[l])+'</a>').join(' · ')+'</nav>';
+ const breadcrumb=route?'<nav class="breadcrumbs" aria-label="'+esc(t('탐색 경로',lang))+'"><a href="'+href('')+'">'+esc(t('모든 도구',lang))+'</a><span>/</span><span aria-current="page">'+esc(t(g[0],lang))+'</span></nav>':'';
+ const related=route?'<section class="related-tools"><h2>'+esc(t('관련 도구',lang))+'</h2><div>'+categorySets.find(([,ids])=>ids.includes(route))[1].filter(id=>id!==route).map(id=>'<a href="'+href(id)+'">'+esc(t(guides[id][0],lang))+'</a>').join('')+'</div></section>':categorySets.map(([cat,ids])=>'<section><h2>'+esc(t(cat,lang))+'</h2><ul>'+ids.map(id=>'<li><a href="'+href(id)+'">'+esc(t(guides[id][0],lang))+'</a><p>'+esc(t(guides[id][1],lang))+'</p></li>').join('')+'</ul></section>').join('');
+ const initial='<header class="site-header"><div class="nav-inner"><a href="'+href('')+'">Pocket Utility</a>'+nav+languageLinks+'</div></header><main class="shell" id="main-content">'+breadcrumb+'<div class="tool-heading"><h1>'+esc(t(g?.[0]||'작고 편리한 온라인 도구',lang))+'</h1><p>'+esc(m.description)+'</p></div><noscript>'+({ko:'변환 기능은 자바스크립트를 켜야 사용할 수 있습니다.',en:'Enable JavaScript to use the conversion tools.',ja:'変換ツールを利用するにはJavaScriptを有効にしてください。'}[lang])+'</noscript>'+guideHTML(route,lang)+related+'</main><footer class="site-footer"><a href="'+href('')+'">Pocket Utility</a></footer>';
+ let html=template.replace('<html lang="ko">','<html lang="'+lang+'">').replace(/<title>.*?<\/title>/,'<title>'+esc(m.title)+'</title>').replace(/<meta name="description" content="[^"]*">/,'<meta name="description" content="'+esc(m.description)+'">').replace('href="entry.css"','href="'+base+'entry.css"').replace('src="entry.js"','src="'+base+'entry.js"').replace('<div id="root"></div>','<div id="root">'+initial+'</div>');
+ const alternates=m.alternates.map(a=>'<link rel="alternate" hreflang="'+a.lang+'" href="'+esc(a.url)+'">').join('')+'<link rel="alternate" hreflang="x-default" href="'+esc(m.alternates[0].url)+'">';
+ html=html.replace('</head>','<meta name="site-base" content="'+esc(base)+'"><meta name="site-url" content="'+esc(site.href)+'"><link rel="canonical" href="'+esc(m.url)+'">'+alternates+'<meta property="og:type" content="website"><meta property="og:site_name" content="Pocket Utility"><meta property="og:title" content="'+esc(m.title)+'"><meta property="og:description" content="'+esc(m.description)+'"><meta property="og:url" content="'+esc(m.url)+'"><meta property="og:locale" content="'+({ko:'ko_KR',en:'en_US',ja:'ja_JP'}[lang])+'"><meta property="og:image" content="'+esc(m.image)+'"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="'+esc(m.title)+'"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="'+esc(m.title)+'"><meta name="twitter:description" content="'+esc(m.description)+'"><meta name="twitter:image" content="'+esc(m.image)+'"><script id="page-schema" type="application/ld+json">'+JSON.stringify(structuredData(route,lang,site)).replace(/</g,'\\u003c')+'</script></head>');
+ const dir='dist/'+pagePath(route,lang);await mkdir(dir,{recursive:true});await writeFile(dir+'index.html',html);
 }
-await writeFile('dist/sitemap.xml','<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+routes.map(r=>'<url><loc>'+esc(new URL(r?r+'/':'',site).href)+'</loc></url>').join('')+'</urlset>');
+for(const lang of languages){const dir='dist/'+pagePath('md-to-html',lang);await mkdir(dir,{recursive:true});await writeFile(dir+'index.html',await readFile('dist/'+pagePath('markdown',lang)+'index.html','utf8'))}
+await writeFile('dist/_redirects',languages.map(l=>'/'+pagePath('md-to-html',l)+' /'+pagePath('markdown',l)+' 301').join('\n')+'\n');
+await writeFile('dist/sitemap.xml','<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">'+languages.flatMap(l=>routes.map(r=>{const m=pageMeta(r,l,site);return '<url><loc>'+esc(m.url)+'</loc>'+m.alternates.map(a=>'<xhtml:link rel="alternate" hreflang="'+a.lang+'" href="'+esc(a.url)+'"/>').join('')+'</url>'})).join('')+'</urlset>');
 await writeFile('dist/robots.txt','User-agent: *\nAllow: /\nSitemap: '+new URL('sitemap.xml',site).href+'\n');
-await writeFile('dist/404.html','<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="robots" content="noindex"><title>페이지를 찾을 수 없습니다</title><h1>페이지를 찾을 수 없습니다.</h1><a href="'+base+'">모든 도구로 돌아가기</a></html>');
-await writeFile('dist/.nojekyll','');
-console.log('Generated '+routes.length+' static pages for '+site.href);
+await writeFile('dist/404.html','<!doctype html><html lang="en"><meta charset="utf-8"><meta name="robots" content="noindex"><title>Page not found | Pocket Utility</title><main><h1>Page not found / 페이지를 찾을 수 없습니다 / ページが見つかりません</h1><a href="'+base+'">All tools / 모든 도구 / すべてのツール</a></main></html>');
+await cp('public/og','dist/og',{recursive:true});await writeFile('dist/.nojekyll','');
+console.log('Generated '+routes.length*languages.length+' localized static pages for '+site.href);

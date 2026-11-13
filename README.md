@@ -34,7 +34,6 @@ HEIC 최초 사용 시 jsDelivr에서 heic-to 1.6.7을 로드합니다. EXIF와 
 
 Node.js 22 이상: `npm install`, `npm test`, `npm run build`.
 GitHub `main` 업데이트 시 자동으로 테스트 → 빌드 → Pages 배포를 실행합니다.
-Hash URL을 사용하므로 저장소 이름을 바꿔도 소스 경로를 수정할 필요가 없습니다.
 
 - `src/App.tsx`: 도구 모음, 한국어 위크넘버, 달력
 - `src/Converter.tsx`: 이미지 변환 및 링크 가져오기
@@ -48,3 +47,17 @@ Hash URL을 사용하므로 저장소 이름을 바꿔도 소스 경로를 수�
 2027년 추석(9/15), 설날(2/7), 정월대보름(2/21), 단오(6/9)를 [우주항공청 2027년 월력요항](https://www.kasa.go.kr/prog/plcyBrf/brief/kor/sub01_01_04/view.do?plcyBrfNo=431)과 대조한 테스트를 포함합니다.
 
 음력 변환: [korean-lunar-calendar](https://github.com/usingsky/korean_lunar_calendar_js), MIT. 한국천문연구원 기준 한국 음력 변환표를 사용하며, 해당 패키지의 지원 범위를 넘는 날짜는 거부합니다.
+
+## Locales, SEO and Markdown
+
+- Requires Node 22.22.2+ (or Node 24.15.0+ on the Node 24 line).
+- Korean routes use the root path. English uses /en/, Japanese uses /ja/.
+- Set SITE_URL when moving hosts. Legacy hash links remain supported. See HOSTING.md.
+- src/translations.json contains UI translations; user input and file contents are never translated.
+- src/week-input.mjs maps explicitly supported English and Japanese date aliases to the Korea-based calendar.
+- src/seo.mjs generates page titles, descriptions, canonical URLs, Open Graph and structured data.
+- Builds produce 36 static localized pages (home + 11 tools), hreflang links, sitemap.xml and robots.txt.
+- public/og contains 1200x630 PNG share images for each page and locale.
+- /markdown/ exports styled HTML, body HTML or plain text (.txt). /md-to-html/ remains a legacy alias.
+- All visitor file conversion runs in the browser. Static site generation never processes visitor files.
+- Tests cover calculations, localized rendering, language/menu interactions, plain text export and generated SEO pages.

@@ -8,8 +8,8 @@ Keep GitHub as the source repository. No server functions or database are requir
 - Set `SITE_URL` to the final public URL, including https and a trailing slash. For example, your actual Pages URL or purchased domain. Do not leave an example domain in production.
 - Without SITE_URL, Cloudflare builds use CF_PAGES_URL. Existing GitHub Actions builds use https://jaysong23.github.io/pocket-utility/.
 - Before connecting a custom domain, update SITE_URL and rebuild so canonical URLs, assets, sitemap and robots match.
-- Direct routes are real folders, not SPA fallback rewrites. Do not add a catch-all 200 redirect. Unknown URLs should return 404.
-- Legacy `#/tool?q=...` bookmarks are migrated by the client; new links use `/tool/?q=...`.
+- Direct routes are real folders, not SPA fallback rewrites. The generated `_redirects` only redirects the old Markdown route. Do not add a catch-all 200 redirect. Unknown URLs should return 404.
+- Legacy `#/tool?q=...` bookmarks are migrated by the client; new links use `/tool/?q=...`, `/en/tool/` or `/ja/tool/`.
 - Submit the final sitemap URL to Search Console after domain verification. On GitHub project hosting, robots.txt is served under the project path; domain-root hosting resolves this.
 
 ## AdSense preparation still requiring owner details
