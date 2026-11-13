@@ -102,3 +102,5 @@ html[data-theme=dark] body{background:#15161e;color:#e6e3ee}
 [data-theme=dark] .md-save .md-primary{background:#8063b4;color:white}
 [data-theme=dark] .md-input-footer,[data-theme=dark] .md-pane-head>span,[data-theme=dark] .md-view-tabs button{color:#b9a9c8}
 @media(max-width:760px){.md-options{grid-template-columns:1fr}.md-editor{grid-template-columns:1fr}.md-source,.md-preview{height:380px}.md-pane-head{padding:10px 12px}.md-save button{justify-content:center;flex:1;padding:12px 8px;font-size:12px}}
+
+.tool-guide{margin:40px 0 24px;padding-top:24px;border-top:1px solid #b4a7c5;line-height:1.9;font-size:13px;overflow-wrap:anywhere}.tool-guide h2{font-size:20px;margin:0 0 12px}.tool-guide h3{font-size:15px;margin:24px 0 8px}.tool-guide ol{padding-left:22px}.tool-guide details{border:1px solid #b4a7c5;border-radius:10px;padding:14px 18px;margin-top:20px}.tool-guide summary{cursor:pointer;font-weight:600}.static-intro{max-width:1100px;margin:auto;padding:30px}.static-intro nav{display:flex;flex-wrap:wrap;gap:16px}.static-intro h1{font-size:28px;margin-top:30px}
