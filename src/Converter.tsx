@@ -1,6 +1,7 @@
 'use client';
 
 import { t as tr, locale, getLanguage } from "./i18n.mjs";
+import { detectImageType, imageMime } from './image-type.mjs';
 import { useRef, useState, useEffect } from 'react';
 import { ArrowDown, ArrowUpRight, Check, FileImage, ImagePlus, Layers, LockKeyhole, Minus, X } from 'lucide-react';
 type Item = {
@@ -47,14 +48,7 @@ function loadHeic(): Promise<HeicDecoder> {
   });
   return decoderPromise;
 }
-const fileType = (f: File) => {
-  const ext = f.name.split('.').pop()?.toLowerCase();
-  if (ext === 'heic' || ext === 'heif' || /^image\/hei[cf]/.test(f.type)) return 'heic';
-  if (ext === 'jpg' || ext === 'jpeg' || f.type === 'image/jpeg') return 'jpg';
-  if (ext === 'png' || f.type === 'image/png') return 'png';
-  if (ext === 'webp' || f.type === 'image/webp') return 'webp';
-  return '';
-};
+const fileType = (f: File) => ({'image/heic':'heic','image/heif':'heic','image/jpeg':'jpg','image/png':'png','image/webp':'webp'})[f.type] || '';
 export default function Converter({
   kind
 }: {
@@ -62,7 +56,7 @@ export default function Converter({
 }) {
   const [items, setItems] = useState<Item[]>([]),
     [format, setFormat] = useState('jpg'),
-    [from, setFrom] = useState(kind),
+    [from, setFrom] = useState('auto'),
     [quality, setQuality] = useState(92),
     [busy, setBusy] = useState(false),
     [drag, setDrag] = useState(false),
@@ -72,19 +66,17 @@ export default function Converter({
     [urlError, setUrlError] = useState('');
   const input = useRef<HTMLInputElement>(null);
   const seq = useRef(0);
-  const add = (files: FileList | File[]) => {
+  const add = async (files: FileList | File[]) => {
+    const next: Item[] = [];
     let errors = 0;
-    const next = Array.from(files).filter(f => {
-      const kind = fileType(f);
-      const ok = !!kind && (from === 'auto' || kind === from);
-      if (!ok) errors++;
-      return ok;
-    }).map(file => ({
-      id: ++seq.current,
-      file,
-      preview: URL.createObjectURL(file),
-      status: '변환 대기'
-    }));
+    for (const original of Array.from(files)) {
+      try {
+        const type = await detectImageType(original);
+        if (!type || (from !== 'auto' && type !== from)) { errors++; continue; }
+        const file = new File([original], original.name, {type: imageMime(type), lastModified: original.lastModified});
+        next.push({id: ++seq.current, file, preview: URL.createObjectURL(file), status: '변환 대기'});
+      } catch { errors++; }
+    }
     setItems(old => [...old, ...next]);
     setNotice(errors ? `지원하지 않거나 FROM 선택과 다른 파일 ${errors}개를 제외했습니다.` : '');
   };

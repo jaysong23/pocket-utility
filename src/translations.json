@@ -2858,5 +2858,17 @@
   "마크다운을 HTML 또는 일반 텍스트로.\n미리 보고 복사·저장하세요.": [
     "Turn Markdown into HTML or plain text. Preview, copy and save.",
     "マークダウンをHTMLやプレーンテキストに。確認してコピー・保存。"
+  ],
+  "이미지 변환": [
+    "Image converter",
+    "画像変換"
+  ],
+  "IMAGE CONVERTER": [
+    "IMAGE CONVERTER",
+    "IMAGE CONVERTER"
+  ],
+  "HEIC·WebP·JPG·PNG 이미지를 원하는 형식으로 변환하세요.": [
+    "Convert HEIC, WebP, JPG and PNG images to your preferred format.",
+    "HEIC・WebP・JPG・PNG画像をお好みの形式に変換できます。"
   ]
 }

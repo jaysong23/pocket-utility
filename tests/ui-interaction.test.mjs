@@ -26,7 +26,15 @@ test('language and category navigation preserve input; plain-text copy uses actu
   await act(async()=>document.querySelector('.md-save button').click());assert.equal(copied,text);
   const details=document.querySelector('.category-nav details');details.open=true;
   await act(async()=>document.querySelector('.category-nav a[href$="webp/"]').click());
-  assert.equal(location.pathname,'/pocket-utility/en/webp/');assert.match(document.querySelector('h1').textContent,/WebP/);assert.equal(details.open,false);
+  assert.equal(location.pathname,'/pocket-utility/en/webp/');assert.match(document.querySelector('h1').textContent,/Image converter/);assert.equal(details.open,false);
+  assert.equal(document.querySelector('.format-direction select').value,'auto');
+  const upload=document.querySelector('input[type=file]');
+  Object.defineProperty(upload,'files',{value:[new File([Uint8Array.from([255,216,255,224])],'photo.jpg',{type:'image/jpeg'})],configurable:true});
+  await act(async()=>upload.dispatchEvent(new Event('change',{bubbles:true})));
+  assert.equal(document.querySelectorAll('.file-row').length,1);
+  assert.equal(document.querySelector('.file-info strong').textContent,'photo.jpg');
+  await act(async()=>{const select=document.querySelectorAll('.format-direction select')[1];select.value='webp';select.dispatchEvent(new Event('change',{bubbles:true}))});
+  assert.equal(document.querySelector('h1').textContent,'Image converter');
   await act(async()=>{const select=document.querySelector('.language-switch select');select.value='ja';select.dispatchEvent(new Event('change',{bubbles:true}))});
   assert.equal(location.pathname,'/pocket-utility/ja/webp/');assert.equal(document.documentElement.lang,'ja');
  }finally{await act(async()=>root.unmount());globalThis.fetch=oldFetch;if(oldNavigator)Object.defineProperty(globalThis,'navigator',oldNavigator);else delete globalThis.navigator;delete globalThis.IS_REACT_ACT_ENVIRONMENT;for(const key of Object.keys(previous)){if(previous[key]===undefined)delete globalThis[key];else globalThis[key]=previous[key]}dom.window.close()}
