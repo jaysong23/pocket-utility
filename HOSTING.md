@@ -15,3 +15,20 @@ Keep GitHub as the source repository. No server functions or database are requir
 ## AdSense preparation still requiring owner details
 
 No ad code is installed. Add the actual publisher ID and corresponding ads.txt only after account setup. Before applying, publish an accurate privacy policy reflecting host logs, external font/CDN/API requests, local browser preferences, advertising and consent requirements; add operator/contact information. Do not invent legal identity or contact details. Review advertising placement so it cannot be confused with conversion/download controls. Approval and revenue are not guaranteed by technical SEO changes.
+
+## Existing Cloudflare Workers static-assets project
+
+The production project was created as a static-assets Worker (not Pages).
+Use the checked-in `wrangler.jsonc` to publish only the generated `dist` directory.
+Uploading the repository root serves the source index.html without entry.js/entry.css.
+
+In Settings > Build, connect jaysong23/pocket-utility, branch main:
+- Build command: `npm run build`
+- Deploy command: `npx wrangler deploy`
+- Root directory: repository root (leave empty)
+- Production build variable SITE_URL: `https://mypocketutility.com/`
+- Build variable NODE_VERSION: `22.22.2`
+
+Remove any `--assets .` or `--assets ./public` override from the deploy command.
+Runtime variables are not needed. Add the custom domain through the Worker Domains UI.
+After deploying, verify /entry.js, /entry.css, /sitemap.xml and localized tool pages.

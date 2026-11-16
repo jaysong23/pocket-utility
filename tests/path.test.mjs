@@ -40,3 +40,9 @@ test('server-only SMB input ignores unrelated custom output settings',()=>{
  assert.equal(convertPath('//asdfsaf','custom','').output,'\\\\asdfsaf');
  assert.throws(()=>convertPath('\\\\asdfsaf','custom',''));
 });
+
+test('reported AFP host converts to UNC without requiring a share',()=>{
+ for(const protocol of ['smb','afp','none','custom']){
+  assert.equal(convertPath('afp://naver.com',protocol,'').output,String.raw`\\naver.com`);
+ }
+});
