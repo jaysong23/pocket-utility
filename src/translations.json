@@ -3570,5 +3570,113 @@
   "주소 이동 경로": [
     "Redirect chain",
     "転送経路"
+  ],
+  "메타태그 검사": [
+    "Meta Tag Checker",
+    "メタタグチェック"
+  ],
+  "서버에서 공개 페이지를 조회합니다. 로그인·봇 차단 페이지는 HTML을 붙여넣어 검사하세요.": [
+    "We fetch public pages on the server. For login or bot-protected pages, paste the HTML.",
+    "公開ページをサーバーで取得します。ログインやボット対策のあるページはHTMLを貼り付けてください。"
+  ],
+  "네이버 시각을 불러오지 못했습니다. 잠시 후 재동기화해 주세요.": [
+    "Could not fetch Naver time. Please sync again shortly.",
+    "NAVERの時刻を取得できません。しばらくして再同期してください。"
+  ],
+  "네이버 서버의 HTTP Date 기준 · 초 단위 정밀도이며 네트워크 오차가 있을 수 있습니다.": [
+    "Based on the Naver server HTTP Date, with second-level precision and possible network error.",
+    "NAVERサーバーのHTTP Dateに基づきます。秒単位の精度で、通信による誤差があります。"
+  ],
+  "Lorem ipsum 생성기": [
+    "Lorem Ipsum Generator",
+    "ダミーテキスト生成"
+  ],
+  "한글·영어·일본어 예시 문장을 간편하게 생성하세요.": [
+    "Generate sample text in Korean, English, or Japanese.",
+    "韓国語・英語・日本語のサンプル文章を簡単に生成します。"
+  ],
+  "문장 언어": [
+    "Text language",
+    "文章の言語"
+  ],
+  "문단 수": [
+    "Paragraphs",
+    "段落数"
+  ],
+  "문단당 문장 수": [
+    "Sentences per paragraph",
+    "段落ごとの文の数"
+  ],
+  "생성된 텍스트": [
+    "Generated text",
+    "生成されたテキスト"
+  ],
+  "다시 생성": [
+    "Generate again",
+    "再生成"
+  ],
+  "TXT 다운로드": [
+    "Download TXT",
+    "TXTをダウンロード"
+  ],
+  "복사하지 못했습니다. 텍스트를 직접 선택해 주세요.": [
+    "Could not copy. Please select the text manually.",
+    "コピーできません。テキストを直接選択してください。"
+  ],
+  "문장 언어와 문단 수를 선택합니다.": [
+    "Choose a language and number of paragraphs.",
+    "文章の言語と段落数を選択します。"
+  ],
+  "문단당 문장 수를 조절해 분량을 맞춥니다.": [
+    "Adjust the number of sentences per paragraph.",
+    "段落ごとの文の数を調整します。"
+  ],
+  "생성된 텍스트를 복사하거나 TXT 파일로 저장합니다.": [
+    "Copy the generated text or save it as a TXT file.",
+    "生成したテキストをコピーするかTXTファイルで保存します。"
+  ],
+  "웹사이트·문서·디자인 시안에 들어갈 임시 문장의 분량과 배치를 확인할 때 사용하세요.": [
+    "Preview the length and layout of placeholder copy in websites, documents, and design drafts.",
+    "ウェブサイト・文書・デザイン案の仮文章の分量や配置を確認できます。"
+  ],
+  "생성한 문장은 어디에서 가져오나요?": [
+    "Where does the generated text come from?",
+    "文章はどこから取得しますか？"
+  ],
+  "브라우저에 포함된 예시 문장을 조합합니다. 외부 서버로 입력값을 전송하지 않으며 한국어·영어·일본어 문장을 제공합니다.": [
+    "The tool combines built-in sample sentences in your browser. No settings are sent to an external server. Korean, English, and Japanese are supported.",
+    "ブラウザー内のサンプル文章を組み合わせます。入力値を外部サーバーに送信せず、韓国語・英語・日本語に対応します。"
+  ],
+  "검사 서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.": [
+    "Cannot reach the inspection server. Please try again shortly.",
+    "検査サーバーに接続できません。しばらくして再試行してください。"
+  ],
+  "조회가 너무 많습니다. 1분 후 다시 시도해 주세요.": [
+    "Too many requests. Please try again in one minute.",
+    "リクエストが多すぎます。1分後に再試行してください。"
+  ],
+  "공개된 외부 웹사이트 주소를 입력해 주세요.": [
+    "Enter a public external website URL.",
+    "公開された外部サイトのURLを入力してください。"
+  ],
+  "도메인을 찾을 수 없습니다. 주소를 확인해 주세요.": [
+    "Domain not found. Check the address.",
+    "ドメインが見つかりません。アドレスを確認してください。"
+  ],
+  "대상 사이트가 요청을 거부했거나 페이지가 없습니다. HTML로 검사해 주세요.": [
+    "The site rejected the request or the page was not found. Paste HTML instead.",
+    "サイトがリクエストを拒否したか、ページがありません。HTMLで検査してください。"
+  ],
+  "대상 사이트에 연결하지 못했습니다. HTML로 검사해 주세요.": [
+    "Could not connect to the site. Paste HTML instead.",
+    "サイトに接続できません。HTMLで検査してください。"
+  ],
+  "검사 서버의 응답이 올바르지 않습니다.": [
+    "Invalid response from the inspection server.",
+    "検査サーバーの応答が正しくありません。"
+  ],
+  "한국어": [
+    "Korean",
+    "韓国語"
   ]
 }

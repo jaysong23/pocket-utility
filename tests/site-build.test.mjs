@@ -6,7 +6,7 @@ import {JSDOM} from 'jsdom';
 import {guides} from '../src/guides.mjs';
 import {t} from '../src/i18n.mjs';
 import {pagePath} from '../src/seo.mjs';
-test('51 localized static pages have unique metadata, semantic content and share images',()=>{
+test('54 localized static pages have unique metadata, semantic content and share images',()=>{
  for(const site of ['https://example.com/','https://jaysong23.github.io/pocket-utility/']){
   execFileSync(process.execPath,['scripts/build.mjs'],{env:{...process.env,SITE_URL:site}});
   const version=JSON.parse(readFileSync('dist/version.json','utf8'));assert.match(version.commit,/^[a-f0-9]{40}$/);assert.ok(Number.isFinite(Date.parse(version.builtAt)));
@@ -24,7 +24,13 @@ test('51 localized static pages have unique metadata, semantic content and share
    if(lang!=='ko'){assert.doesNotMatch(d.querySelector('main').textContent,/[가-힣]/)}
    assert.ok(html.includes('src="'+new URL(site).pathname+'entry.js"'));dom.window.close();
   }
-  assert.equal(canonicals.size,51);const sitemap=readFileSync('dist/sitemap.xml','utf8');assert.equal((sitemap.match(/<loc>/g)||[]).length,51);assert.ok(!sitemap.includes('#/'));assert.ok(!sitemap.includes('md-to-html'));
+  assert.equal(canonicals.size,54);const sitemap=readFileSync('dist/sitemap.xml','utf8');assert.equal((sitemap.match(/<loc>/g)||[]).length,54);assert.ok(!sitemap.includes('#/'));assert.ok(!sitemap.includes('md-to-html'));
   assert.ok(readFileSync('dist/md-to-html/index.html','utf8').includes('href="'+site+'markdown/"'));
  }
+});
+
+test('verification and icons are present in built HTML and ICO contains small sizes',()=>{
+ const html=readFileSync('dist/index.html','utf8');assert.ok(html.includes('name="naver-site-verification" content="a35bf882b515b12fcc10b239dcc8be5aaeb63caf"'));
+ assert.ok(html.includes('rel="apple-touch-icon"'));assert.ok(html.includes('favicon.ico'));assert.ok(html.includes('icons/pocket-64.png'));
+ const ico=readFileSync('dist/favicon.ico');assert.equal(ico.readUInt16LE(2),1);assert.equal(ico.readUInt16LE(4),3);assert.deepEqual([ico[6],ico[22],ico[38]],[16,32,48]);
 });

@@ -36,7 +36,7 @@ After deploying, verify /entry.js, /entry.css, /sitemap.xml and localized tool p
 
 ## URL resolver Worker
 
-`wrangler.jsonc` now includes `main: worker/index.mjs`, the `ASSETS` binding, and API-only Worker-first routing. Keep build command `npm run build` and deploy command `npx wrangler deploy`. Do not use an assets-only deploy override. Static pages continue to be served directly. `/api/expand-url` alone handles URL lookups with a POST JSON body.
+`wrangler.jsonc` now includes `main: worker/index.mjs`, the `ASSETS` binding, and API-only Worker-first routing. Keep build command `npm run build` and deploy command `npx wrangler deploy`. Do not use an assets-only deploy override. Static pages continue to be served directly. `/api/expand-url`, `/api/inspect-url`, and `/api/naver-time` handle POST JSON requests. They share the rate limiter. HTML inspection is capped at 2MB; Naver time reads only the fixed Search Ads root HTTP Date.
 
 The configured `URL_RATE_LIMITER` binding is deployed with Wrangler (4.36+). This change does not subscribe to Workers Paid or enable a paid third-party URL API. Confirm the account remains on Workers Free in the dashboard if zero overage billing is required; the daily free quota is shared across the account. Rate limiting reduces repeated outbound work but rejected requests still count as Worker invocations. No strict global daily budget is implemented.
 

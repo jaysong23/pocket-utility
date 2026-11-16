@@ -1,3 +1,4 @@
+import {httpDateSample} from '../src/clock-sync.mjs';
 const REDIRECTS=new Set([301,302,303,307,308]);
 export class ResolveError extends Error{constructor(code,status=400){super(code);this.code=code;this.status=status}}
 export function publicURL(value,ownHost=''){
@@ -20,14 +21,14 @@ async function checkDNS(host,fetcher,signal){
  }));
  const ips=records.flat();if(!ips.length||ips.some(ip=>!publicIP(ip)))throw new ResolveError('BLOCKED_URL');
 }
-export async function resolveURL(value,{fetcher=fetch,ownHost='',signal}={}){
+export async function resolveURL(value,{fetcher=fetch,ownHost='',signal,includeHTML=false}={}){
  let current=publicURL(value,ownHost);const visited=new Set(),chain=[];
  for(let hop=0;hop<=8;hop++){
   const key=current.href.split('#')[0];if(visited.has(key))throw new ResolveError('REDIRECT_LOOP',422);visited.add(key);
   await checkDNS(current.hostname,fetcher,signal);
   // Manual redirects ensure every destination is validated before requesting it.
   const res=await fetcher(key,{redirect:'manual',method:'GET',headers:{'User-Agent':'MyPocketUtility-LinkResolver/1.0','Accept':'text/html,*/*;q=0.5'},signal});
-  await res.body?.cancel();
+  if(REDIRECTS.has(res.status)||!includeHTML)await res.body?.cancel();
   chain.push({url:current.href,status:res.status});
   if(REDIRECTS.has(res.status)){
    const location=res.headers.get('location');if(!location)throw new ResolveError('INVALID_REDIRECT',502);
@@ -38,9 +39,29 @@ export async function resolveURL(value,{fetcher=fetch,ownHost='',signal}={}){
   }
   // Even a blocked final page can reveal a destination via the preceding Location.
   // Surface its HTTP status rather than claiming the page is accessible.
+  if(includeHTML){
+   if(!res.ok){await res.body?.cancel();throw new ResolveError('HTTP_'+res.status,502)}
+   const type=res.headers.get('content-type')||'';
+   if(!/text\/html|application\/xhtml\+xml/i.test(type)){await res.body?.cancel();throw new ResolveError('NOT_HTML',422)}
+   const max=2*1024*1024;
+   if(Number(res.headers.get('content-length'))>max){await res.body?.cancel();throw new ResolveError('HTML_TOO_LARGE',413)}
+   const reader=res.body?.getReader(),chunks=[];let size=0;
+   if(reader)try{while(true){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>max){await reader.cancel();throw new ResolveError('HTML_TOO_LARGE',413)}chunks.push(value)}}finally{reader.releaseLock()}
+   const bytes=new Uint8Array(size);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length}
+   let decoder;try{decoder=new TextDecoder(type.match(/charset\s*=\s*["']?([^\s;"']+)/i)?.[1]||'utf-8')}catch{decoder=new TextDecoder()}
+   return {url:current.href,html:decoder.decode(bytes)};
+  }
   return {url:current.href,redirected:chain.length>1,chain,status:res.status};
  }
  throw new ResolveError('TOO_MANY_REDIRECTS',422);
+}
+export async function naverTime({fetcher=fetch,signal}={}){
+ const response=await fetcher('https://api.searchad.naver.com/',{method:'HEAD',redirect:'error',cache:'no-store',headers:{'Cache-Control':'no-cache'},signal});
+ const date=response.headers.get('date'),age=response.headers.get('age');
+ await response.body?.cancel();
+ // The root is not a time API and may return 404; its fresh HTTP Date is still usable.
+ try{httpDateSample(date,age,0,0)}catch{throw new ResolveError('INVALID_TIME',502)}
+ return {date,age,source:'https://api.searchad.naver.com/',precisionMs:1000};
 }
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 async function readBody(request){
@@ -51,7 +72,7 @@ async function readBody(request){
 }
 export default {async fetch(request,env){
  const url=new URL(request.url);
- if(url.pathname!=='/api/expand-url')return env.ASSETS.fetch(request);
+ if(!['/api/expand-url','/api/naver-time','/api/inspect-url'].includes(url.pathname))return env.ASSETS.fetch(request);
  if(request.method!=='POST')return json({error:'METHOD_NOT_ALLOWED'},405);
  // Only same-site browser requests; do not provide an open CORS proxy.
  const origin=request.headers.get('origin');if(origin!==url.origin||request.headers.get('sec-fetch-site')==='cross-site')return json({error:'FORBIDDEN'},403);
@@ -60,9 +81,9 @@ export default {async fetch(request,env){
   if(!env.URL_RATE_LIMITER)return json({error:'UNAVAILABLE'},503);
   const {success}=await env.URL_RATE_LIMITER.limit({key:request.headers.get('CF-Connecting-IP')||'unknown'});
   if(!success)return json({error:'RATE_LIMITED'},429);
-  const body=await readBody(request);if(typeof body.url!=='string')throw new ResolveError('INVALID_URL');
+  const body=await readBody(request);if(url.pathname!=='/api/naver-time'&&typeof body?.url!=='string')throw new ResolveError('INVALID_URL');
   const ctl=new AbortController(),timeout=setTimeout(()=>ctl.abort(),9000);
-  try{return json(await resolveURL(body.url.trim(),{ownHost:url.hostname,signal:ctl.signal}))}
+  try{return json(url.pathname==='/api/naver-time'?await naverTime({signal:ctl.signal}):await resolveURL(body.url.trim(),{ownHost:url.hostname,signal:ctl.signal,includeHTML:url.pathname==='/api/inspect-url'}))}
   catch(e){if(ctl.signal.aborted)return json({error:'TIMEOUT'},504);throw e}
   finally{clearTimeout(timeout)}
  }catch(e){return json({error:e instanceof ResolveError?e.code:'FETCH_FAILED'},e instanceof ResolveError?e.status:502)}

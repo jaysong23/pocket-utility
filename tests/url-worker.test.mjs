@@ -9,3 +9,16 @@ test('rejects private DNS resolutions before any destination request',async()=>{
 test('loops and excessive redirects fail without inventing a destination',async()=>{await assert.rejects(()=>resolveURL('https://bit.ly/a',{fetcher:mock({'https://bit.ly/a':{status:302,location:'/a'}})}),/REDIRECT_LOOP/);const pages={};for(let i=0;i<=8;i++)pages['https://bit.ly/'+i]={status:302,location:'/'+(i+1)};await assert.rejects(()=>resolveURL('https://bit.ly/0',{fetcher:mock(pages)}),/TOO_MANY_REDIRECTS/)});
 const req=(body,headers={})=>new Request('https://mypocketutility.com/api/expand-url',{method:'POST',headers:{origin:'https://mypocketutility.com','content-type':'application/json',...headers},body:JSON.stringify(body)});
 test('API enforces origin, method, size and rate binding; unrelated routes use static assets',async()=>{let assets=0;const env={ASSETS:{fetch:()=>{assets++;return new Response('static')}},URL_RATE_LIMITER:{limit:async()=>({success:true})}};assert.equal((await worker.fetch(new Request('https://mypocketutility.com/clock/'),env)).status,200);assert.equal(assets,1);assert.equal((await worker.fetch(new Request('https://mypocketutility.com/api/expand-url'),env)).status,405);assert.equal((await worker.fetch(req({url:'https://bit.ly/a'},{origin:'https://evil.com'}),env)).status,403);assert.equal((await worker.fetch(req({url:'a'.repeat(9000)}),env)).status,413);assert.equal((await worker.fetch(req({url:'https://bit.ly/a'}),{...env,URL_RATE_LIMITER:{limit:async()=>({success:false})}})).status,429);assert.equal((await worker.fetch(req({url:'https://bit.ly/a'}),{})).status,503)});
+test('meta fetch follows redirects, preserves final URL and enforces HTML limits',async()=>{
+ const fetcher=async url=>url.includes('cloudflare-dns.com')?dns():url==='https://bit.ly/a'?new Response(null,{status:302,headers:{location:'https://example.com/page'}}):new Response('<title>Sample</title>',{headers:{'content-type':'text/html;charset=utf-8'}});
+ assert.deepEqual(await resolveURL('https://bit.ly/a',{fetcher,includeHTML:true}),{url:'https://example.com/page',html:'<title>Sample</title>'});
+ for(const [response,error] of [[()=>new Response('x',{status:403}),/HTTP_403/],[()=>new Response('x',{headers:{'content-type':'image/png'}}),/NOT_HTML/],[()=>new Response('x'.repeat(2*1024*1024+1),{headers:{'content-type':'text/html'}}),/HTML_TOO_LARGE/]]){
+  await assert.rejects(()=>resolveURL('https://example.com/page',{includeHTML:true,fetcher:async u=>u.includes('cloudflare-dns.com')?dns():response()}),error);
+ }
+});
+test('Naver time reads fresh HTTP Date even on root 404 and rejects cached dates',async()=>{
+ const {naverTime}=await import('../worker/index.mjs');let opts;
+ const r=await naverTime({fetcher:async(u,o)=>{assert.equal(u,'https://api.searchad.naver.com/');opts=o;return new Response(null,{status:404,headers:{date:'Mon, 16 Nov 2026 10:00:00 GMT'}})}});
+ assert.equal(r.precisionMs,1000);assert.equal(opts.method,'HEAD');
+ await assert.rejects(()=>naverTime({fetcher:async()=>new Response(null,{headers:{date:'Mon, 16 Nov 2026 10:00:00 GMT',age:'60'}})}),/INVALID_TIME/);
+});

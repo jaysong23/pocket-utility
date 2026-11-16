@@ -19,15 +19,13 @@ export function inspectHTML(html,source,document){
  return {fields,issues,title:root.querySelector('title')?.textContent||'',description:first('description'),robots:first('robots'),canonical:httpURL(canonicalRaw,base),canonicalRaw,image:httpURL(first('og:image')||first('twitter:image'),base),previewTitle:first('og:title')||root.querySelector('title')?.textContent||'',previewDescription:first('og:description')||first('description'),source};
 }
 export async function fetchPage(url,signal){
- const response=await fetch(url,{mode:'cors',credentials:'omit',referrerPolicy:'no-referrer',signal});
- if(!response.ok)throw Error('HTTP '+response.status);
- const type=response.headers.get('content-type')||'';
- if(type&&!/text\/html|application\/xhtml\+xml/i.test(type))throw Error('HTML 페이지 주소를 입력해 주세요.');
- if(Number(response.headers.get('content-length'))>MAX_HTML_BYTES)throw Error('HTML은 2MB 이하로 입력해 주세요.');
- const reader=response.body?.getReader();if(!reader){const html=await response.text();if(new TextEncoder().encode(html).length>MAX_HTML_BYTES)throw Error('HTML은 2MB 이하로 입력해 주세요.');return {html,url:response.url||url}}
- const chunks=[];let length=0;
- try{while(true){const {done,value}=await reader.read();if(done)break;length+=value.length;if(length>MAX_HTML_BYTES){await reader.cancel();throw Error('HTML은 2MB 이하로 입력해 주세요.')}chunks.push(value)}}finally{reader.releaseLock()}
- const bytes=new Uint8Array(length);let pos=0;for(const chunk of chunks){bytes.set(chunk,pos);pos+=chunk.length}
- const charset=type.match(/charset\s*=\s*["']?([^\s;"']+)/i)?.[1]||'utf-8';let decoder;try{decoder=new TextDecoder(charset)}catch{decoder=new TextDecoder()}
- return {html:decoder.decode(bytes),url:response.url||url};
+ const response=await fetch('/api/inspect-url',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url}),credentials:'omit',cache:'no-store',signal});
+ let data;try{data=await response.json()}catch{throw Error('검사 서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.')}
+ if(!response.ok){
+  const errors={TIMEOUT:'조회 시간이 초과되었습니다. HTML로 검사해 주세요.',RATE_LIMITED:'조회가 너무 많습니다. 1분 후 다시 시도해 주세요.',NOT_HTML:'HTML 페이지 주소를 입력해 주세요.',HTML_TOO_LARGE:'HTML은 2MB 이하로 입력해 주세요.',BLOCKED_URL:'공개된 외부 웹사이트 주소를 입력해 주세요.',INVALID_URL:'http 또는 https 페이지 주소를 입력해 주세요.',DNS_FAILED:'도메인을 찾을 수 없습니다. 주소를 확인해 주세요.'};
+  throw Error(errors[data.error]||(/^HTTP_/.test(data.error)?'대상 사이트가 요청을 거부했거나 페이지가 없습니다. HTML로 검사해 주세요.':'대상 사이트에 연결하지 못했습니다. HTML로 검사해 주세요.'));
+ }
+ if(typeof data.html!=='string'||!httpURL(data.url))throw Error('검사 서버의 응답이 올바르지 않습니다.');
+ if(new TextEncoder().encode(data.html).length>MAX_HTML_BYTES)throw Error('HTML은 2MB 이하로 입력해 주세요.');
+ return data;
 }
