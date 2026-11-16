@@ -56,7 +56,8 @@ export async function resolveURL(value,{fetcher=fetch,ownHost='',signal,includeH
  throw new ResolveError('TOO_MANY_REDIRECTS',422);
 }
 export async function naverTime({fetcher=fetch,signal}={}){
- const response=await fetcher('https://api.searchad.naver.com/',{method:'HEAD',redirect:'error',cache:'no-store',headers:{'Cache-Control':'no-cache'},signal});
+ const response=await fetcher('https://api.searchad.naver.com/',{method:'HEAD',redirect:'manual',cache:'no-store',headers:{'Cache-Control':'no-cache'},signal});
+ if(REDIRECTS.has(response.status)){await response.body?.cancel();throw new ResolveError('INVALID_TIME',502)}
  const date=response.headers.get('date'),age=response.headers.get('age');
  await response.body?.cancel();
  // The root is not a time API and may return 404; its fresh HTTP Date is still usable.

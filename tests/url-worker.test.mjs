@@ -19,6 +19,6 @@ test('meta fetch follows redirects, preserves final URL and enforces HTML limits
 test('Naver time reads fresh HTTP Date even on root 404 and rejects cached dates',async()=>{
  const {naverTime}=await import('../worker/index.mjs');let opts;
  const r=await naverTime({fetcher:async(u,o)=>{assert.equal(u,'https://api.searchad.naver.com/');opts=o;return new Response(null,{status:404,headers:{date:'Mon, 16 Nov 2026 10:00:00 GMT'}})}});
- assert.equal(r.precisionMs,1000);assert.equal(opts.method,'HEAD');
+ assert.equal(r.precisionMs,1000);assert.equal(opts.method,'HEAD');assert.equal(opts.redirect,'manual');
  await assert.rejects(()=>naverTime({fetcher:async()=>new Response(null,{headers:{date:'Mon, 16 Nov 2026 10:00:00 GMT',age:'60'}})}),/INVALID_TIME/);
 });
