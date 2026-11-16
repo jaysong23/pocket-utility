@@ -75,3 +75,5 @@ GitHub `main` 업데이트 시 자동으로 테스트 → 빌드 → Pages 배�
 - Favicon and GNB share the pocket icon. Naver site verification is embedded in the static HTML head.
 
 Browser notifications remember explicit on/off preferences, recheck permission on focus, and offer an immediate test. An active notification-only service worker is preferred, with the desktop Notification constructor as fallback. It does not cache pages, schedule background timers or add a push server. OS notification banners, Focus/Do Not Disturb, suspended tabs and device sleep can still prevent or delay visible alerts. Automated tests verify API requests; native OS banners require a device-level check.
+
+Google Tag Manager `GTM-TWZHXWH8` is installed through the shared HTML template. Its published container includes GA4 `G-37Q7F0TD0R`; tag settings and triggers are managed in GTM. No separate gtag.js loader is installed. Actual GA4 collection must be checked in Realtime/Tag Assistant; public container availability is not proof of delivery.
