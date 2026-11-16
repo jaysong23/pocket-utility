@@ -1,3 +1,4 @@
+import {infoPages} from '../src/info-pages.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {build} from 'esbuild';
@@ -11,7 +12,7 @@ await build({entryPoints:['src/App.tsx'],bundle:true,platform:'node',format:'esm
 const {default:App}=await import('../node_modules/.cache/pocket-ui/app.mjs');
 test('all localized tool screens render with one H1 and translated UI',()=>{
  const failures=[];
- for(const lang of ['ko','en','ja'])for(const route of ['',...Object.keys(guides)]){
+ for(const lang of ['ko','en','ja'])for(const route of ['',...Object.keys(guides),...Object.keys(infoPages)]){
   const dom=new JSDOM('<meta name="site-base" content="/pocket-utility/">',{url:'https://example.com/pocket-utility/'+(lang==='ko'?'':lang+'/')+(route?route+'/':'')});
   const previous={};for(const key of ['window','document','localStorage','sessionStorage']){previous[key]=globalThis[key];globalThis[key]=dom.window[key]}
   try{

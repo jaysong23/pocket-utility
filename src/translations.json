@@ -3730,5 +3730,45 @@
   "브라우저 알림 테스트입니다.": [
     "This is a browser notification test.",
     "ブラウザー通知のテストです。"
+  ],
+  "사이트 안내": [
+    "Site information",
+    "サイト情報"
+  ],
+  "받는 사람": [
+    "To",
+    "宛先"
+  ],
+  "이메일 주소 복사": [
+    "Copy email address",
+    "メールアドレスをコピー"
+  ],
+  "문의 제목": [
+    "Subject",
+    "件名"
+  ],
+  "문의 내용": [
+    "Message",
+    "お問い合わせ内容"
+  ],
+  "제목 앞에 [MPU]가 자동으로 붙습니다.": [
+    "[MPU] is automatically added to the subject.",
+    "件名の先頭に[MPU]が自動的に付きます。"
+  ],
+  "이메일 앱이 열리지 않으면 주소와 작성 내용을 복사해 웹메일에서 보내주세요.": [
+    "If your email app does not open, copy the address and draft into your webmail.",
+    "メールアプリが開かない場合はアドレスと下書きをコピーしてウェブメールから送信してください。"
+  ],
+  "이메일 앱에서 보내기": [
+    "Send with email app",
+    "メールアプリで送信"
+  ],
+  "작성 내용 복사": [
+    "Copy draft",
+    "下書きをコピー"
+  ],
+  "이메일 앱에서 최종 전송해 주세요. 아직 발송 완료된 상태가 아닙니다.": [
+    "Send the message in your email app. It has not been sent yet.",
+    "メールアプリで最終送信してください。まだ送信は完了していません。"
   ]
 }
