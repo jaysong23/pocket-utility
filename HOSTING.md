@@ -32,3 +32,12 @@ In Settings > Build, connect jaysong23/pocket-utility, branch main:
 Remove any `--assets .` or `--assets ./public` override from the deploy command.
 Runtime variables are not needed. Add the custom domain through the Worker Domains UI.
 After deploying, verify /entry.js, /entry.css, /sitemap.xml and localized tool pages.
+
+
+## URL resolver Worker
+
+`wrangler.jsonc` now includes `main: worker/index.mjs`, the `ASSETS` binding, and API-only Worker-first routing. Keep build command `npm run build` and deploy command `npx wrangler deploy`. Do not use an assets-only deploy override. Static pages continue to be served directly. `/api/expand-url` alone handles URL lookups with a POST JSON body.
+
+The configured `URL_RATE_LIMITER` binding is deployed with Wrangler (4.36+). This change does not subscribe to Workers Paid or enable a paid third-party URL API. Confirm the account remains on Workers Free in the dashboard if zero overage billing is required; the daily free quota is shared across the account. Rate limiting reduces repeated outbound work but rejected requests still count as Worker invocations. No strict global daily budget is implemented.
+
+Manual smoke test: POST `{"url":"https://bit.ly/3sKSL66"}` to `/api/expand-url` with `Content-Type: application/json` and `Origin: https://mypocketutility.com`. The returned destination should be on `www.hyundaicard.com` (the link owner may change it). Client-side time sync and OG URL fetching remain browser-only; this endpoint does not proxy HTML, images or files.

@@ -3518,5 +3518,57 @@
   "이 주소에는 파라미터가 없습니다.": [
     "This URL has no parameters.",
     "このURLにはパラメーターがありません。"
+  ],
+  "주소 조회는 서버에서 처리하며 클릭 통계에 잡힐 수 있습니다. 로그인·보안 확인·자바스크립트 이동이 필요한 링크는 조회가 제한됩니다.": [
+    "URL resolution runs on our server and may count as a click. Links requiring login, security challenges or JavaScript redirects may not resolve.",
+    "URL取得はサーバーで処理し、クリックに計上される場合があります。ログイン・セキュリティ確認・JavaScript転送が必要なリンクは取得できない場合があります。"
+  ],
+  "파라미터 이름에 따른 참고 분류입니다. 광고 여부나 링크 안전성을 보장하지 않습니다. HTTP 주소 이동만 확인합니다.": [
+    "Classification is based on parameter names, not a guarantee of ad status or safety. Only HTTP redirects are inspected.",
+    "パラメーター名に基づく参考分類です。広告や安全性を保証しません。HTTP転送のみ確認します。"
+  ],
+  "서버에서 HTTP 주소 이동을 확인합니다. 로그인·보안 확인·자바스크립트 이동이 필요한 링크는 조회가 제한될 수 있으며 조회 요청이 클릭 통계에 잡힐 수 있습니다.": [
+    "The server follows HTTP redirects. Links requiring login, security checks or JavaScript may not resolve. Requests may count as clicks.",
+    "サーバーでHTTP転送を確認します。ログイン・セキュリティ確認・JavaScriptが必要なリンクは取得できない場合があり、クリックに計上されることがあります。"
+  ],
+  "공개 웹사이트 주소만 조회할 수 있습니다.": [
+    "Only public website URLs can be resolved.",
+    "公開ウェブサイトのURLのみ取得できます。"
+  ],
+  "조회가 너무 많습니다. 잠시 후 다시 시도해 주세요.": [
+    "Too many requests. Please try again shortly.",
+    "リクエストが多すぎます。しばらくしてからお試しください。"
+  ],
+  "서버 응답 시간이 초과되었습니다.": [
+    "The server request timed out.",
+    "サーバー応答がタイムアウトしました。"
+  ],
+  "주소가 반복해서 이동합니다.": [
+    "The URL redirects in a loop.",
+    "URLがループしています。"
+  ],
+  "주소 이동 횟수가 너무 많습니다.": [
+    "Too many redirects.",
+    "転送回数が多すぎます。"
+  ],
+  "URL 조회 서버를 사용할 수 없습니다.": [
+    "The URL resolver is unavailable.",
+    "URL取得サーバーを利用できません。"
+  ],
+  "사이트를 새로고침한 뒤 다시 시도해 주세요.": [
+    "Refresh the page and try again.",
+    "ページを更新して再度お試しください。"
+  ],
+  "목적지 서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.": [
+    "Could not reach the destination server. Please try again shortly.",
+    "転送先サーバーに接続できませんでした。しばらくしてからお試しください。"
+  ],
+  "목적지 주소는 확인했지만 페이지가 오류 또는 접근 제한을 반환했습니다.": [
+    "The destination URL was identified, but the page returned an error or denied access.",
+    "転送先URLは確認できましたが、ページがエラーまたはアクセス制限を返しました。"
+  ],
+  "주소 이동 경로": [
+    "Redirect chain",
+    "転送経路"
   ]
 }

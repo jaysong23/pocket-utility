@@ -11,7 +11,7 @@ test('primary submission resolves parameter-free URLs; failures and local analys
  const old={};for(const key of ['window','document','HTMLElement','Event']){old[key]=globalThis[key];globalThis[key]=dom.window[key]}
  const oldFetch=globalThis.fetch;globalThis.IS_REACT_ACT_ENVIRONMENT=true;
  const {createRoot}=await import('react-dom/client');const {default:Component}=await import('../node_modules/.cache/url-expander/component.mjs');const root=createRoot(document.querySelector('#root'));
- let calls=0;globalThis.fetch=async()=>{calls++;return {ok:true,type:'cors',redirected:true,url:'https://destination.example/product',body:{cancel:async()=>{}}}};
+ let calls=0;globalThis.fetch=async()=>{calls++;return new Response(JSON.stringify({url:'https://destination.example/product',redirected:true,chain:[{url:'https://short.example/abc',status:301},{url:'https://destination.example/product',status:200}],status:200}),{headers:{'content-type':'application/json'}})};
  try{
   await act(async()=>root.render(React.createElement(Component)));
   const input=document.querySelector('input');
