@@ -1,3 +1,4 @@
+import {visitorStats} from './visitor-stats.mjs';
 import {httpDateSample} from '../src/clock-sync.mjs';
 const REDIRECTS=new Set([301,302,303,307,308]);
 export class ResolveError extends Error{constructor(code,status=400){super(code);this.code=code;this.status=status}}
@@ -73,6 +74,7 @@ async function readBody(request){
 }
 export default {async fetch(request,env){
  const url=new URL(request.url);
+ if(url.pathname==='/api/visitor-stats')return visitorStats(request,env);
  if(!['/api/expand-url','/api/naver-time','/api/inspect-url'].includes(url.pathname))return env.ASSETS.fetch(request);
  if(request.method!=='POST')return json({error:'METHOD_NOT_ALLOWED'},405);
  // Only same-site browser requests; do not provide an open CORS proxy.
