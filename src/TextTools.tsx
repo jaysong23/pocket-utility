@@ -36,7 +36,7 @@ export function Symbols() {
  </div>;
 }
 export function InstaFonts() {
-  const [input, setInput] = useState('Pocket Utility'),
+  const [input, setInput] = useState('MY POCKET UTILITY'),
     {
       status,
       copy

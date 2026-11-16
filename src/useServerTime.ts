@@ -1,9 +1,25 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {serverSample,synchronizedNow} from './clock-sync.mjs';
-export default function useServerTime(){
- const sample=useRef<any>(null),request=useRef<AbortController|null>(null),alive=useRef(true);
- const [now,setNow]=useState(Date.now),[status,setStatus]=useState('syncing'),[rtt,setRtt]=useState(0);
- const sync=useCallback(async()=>{if(request.current)return;const ctl=new AbortController();request.current=ctl;setStatus('syncing');const timeout=setTimeout(()=>ctl.abort(),9000);try{const start=performance.now();const res=await fetch('https://timeapi.io/api/time/current/zone?timeZone=UTC',{cache:'no-store',credentials:'omit',signal:ctl.signal});if(!res.ok)throw Error();const data=await res.json();const end=performance.now();const next=serverSample(data,start,end);if(alive.current){sample.current=next;setNow(next.epoch);setRtt(Math.round(next.rtt));setStatus('synced')}}catch{if(alive.current)setStatus(sample.current?'stale':'failed')}finally{clearTimeout(timeout);if(request.current===ctl)request.current=null}},[]);
- useEffect(()=>{alive.current=true;void sync();const tick=setInterval(()=>setNow(sample.current?synchronizedNow(sample.current,performance.now()):Date.now()),200);const refresh=setInterval(()=>void sync(),300000);const visible=()=>{if(document.visibilityState==='visible')void sync()};document.addEventListener('visibilitychange',visible);return()=>{alive.current=false;request.current?.abort();clearInterval(tick);clearInterval(refresh);document.removeEventListener('visibilitychange',visible)}},[sync]);
- return {now,status,rtt,sync};
+import {serverSample,synchronizedNow,httpDateSample} from './clock-sync.mjs';
+export default function useServerTime(source='timeapi',address=''){
+ const sample=useRef<any>(null),request=useRef<AbortController|null>(null);
+ const [now,setNow]=useState(Date.now),[status,setStatus]=useState('syncing'),[rtt,setRtt]=useState(0),[error,setError]=useState('');
+ const sync=useCallback(async()=>{
+  if(request.current)return;
+  if(source==='custom'&&!address){setStatus('failed');return}
+  const ctl=new AbortController();request.current=ctl;setStatus('syncing');setError('');
+  const timeout=setTimeout(()=>ctl.abort(),9000);
+  try{
+   const url=new URL(source==='timeapi'?'https://timeapi.io/api/time/current/zone?timeZone=UTC':source==='naver'?'https://api.searchad.naver.com/':address);
+   if(url.protocol!=='https:'||url.username||url.password)throw Error('HTTPS 서버 주소를 입력해 주세요.');
+   const start=performance.now();
+   const res=await fetch(url.href,{method:source==='timeapi'?'GET':'HEAD',mode:'cors',cache:'no-store',credentials:'omit',referrerPolicy:'no-referrer',signal:ctl.signal});
+   let next;
+   if(source==='timeapi'){if(!res.ok)throw Error();next=serverSample(await res.json(),start,performance.now())}
+   else next=httpDateSample(res.headers.get('date'),res.headers.get('age'),start,performance.now());
+   if(request.current===ctl&&!ctl.signal.aborted){sample.current=next;setNow(next.epoch);setRtt(Math.round(next.rtt));setStatus('synced')}
+  }catch(e){if(request.current===ctl){setStatus(sample.current?'stale':'failed');setError(source==='timeapi'?'서버 연결 상태를 확인해 주세요.':'서버 시간을 읽을 수 없습니다. HTTPS 주소, 외부 접근 허용 및 Date 헤더 공개 설정을 확인해 주세요.')}}
+  finally{clearTimeout(timeout);if(request.current===ctl)request.current=null}
+ },[source,address]);
+ useEffect(()=>{sample.current=null;setNow(Date.now());setRtt(0);setError('');void sync();const tick=setInterval(()=>setNow(sample.current?synchronizedNow(sample.current,performance.now()):Date.now()),200);const refresh=setInterval(()=>void sync(),300000);const visible=()=>{if(document.visibilityState==='visible')void sync()};document.addEventListener('visibilitychange',visible);return()=>{request.current?.abort();request.current=null;clearInterval(tick);clearInterval(refresh);document.removeEventListener('visibilitychange',visible)}},[sync]);
+ return {now,status,rtt,sync,error};
 }

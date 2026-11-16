@@ -771,9 +771,9 @@
     "Sync failed · temporary device time",
     "同期失敗・端末時刻を一時使用"
   ],
-  "Pocket Utility · 미니 시계": [
-    "Pocket Utility · Mini clock",
-    "Pocket Utility・ミニ時計"
+  "MY POCKET UTILITY · 미니 시계": [
+    "MY POCKET UTILITY · Mini clock",
+    "MY POCKET UTILITY・ミニ時計"
   ],
   "PIP를 열지 못해 페이지 안의 미니 창으로 표시합니다.": [
     "PIP could not open. Showing an in-page mini window instead.",
@@ -1036,8 +1036,8 @@
     "変換失敗"
   ],
   "파일을 읽을 수 없습니다.": [
-    "Could not read the file.",
-    "ファイルを読み込めません。"
+    "Cannot read this file.",
+    "ファイルを読み取れません。"
   ],
   "여기에": [
     "Drop",
@@ -1195,9 +1195,9 @@
     "images are not stored on our servers.",
     "画像をサーバーに保存しません。"
   ],
-  "# 마크다운을 HTML로\n\n문서를 **간편하게** 작성하고 웹페이지로 저장하세요.\n\n## 할 일\n\n- [x] 마크다운 입력하기\n- [ ] HTML로 저장하기\n\n## 표\n\n| 도구 | 기능 |\n| --- | --- |\n| Pocket Utility | 일상 도구 모음 |\n| MD → HTML | 문서 변환 |\n\n> 표, 체크리스트, 인용문, 코드블록을 지원합니다.\n\n": [
-    "# Markdown converter\n\nWrite **easily** and export your document.\n\n## Tasks\n\n- [x] Enter Markdown\n- [ ] Save the result\n\n## Table\n\n| Tool | Purpose |\n| --- | --- |\n| Pocket Utility | Everyday tools |\n| Markdown | Document conversion |\n\n> Tables, checklists, quotes and code blocks are supported.\n\n",
-    "# マークダウン変換\n\n文書を**手軽に**作成して保存しましょう。\n\n## タスク\n\n- [x] マークダウンを入力\n- [ ] 結果を保存\n\n## 表\n\n| ツール | 機能 |\n| --- | --- |\n| Pocket Utility | 日常ツール集 |\n| Markdown | 文書変換 |\n\n> 表・チェックリスト・引用・コードブロックに対応。\n\n"
+  "# 마크다운을 HTML로\n\n문서를 **간편하게** 작성하고 웹페이지로 저장하세요.\n\n## 할 일\n\n- [x] 마크다운 입력하기\n- [ ] HTML로 저장하기\n\n## 표\n\n| 도구 | 기능 |\n| --- | --- |\n| MY POCKET UTILITY | 일상 도구 모음 |\n| MD → HTML | 문서 변환 |\n\n> 표, 체크리스트, 인용문, 코드블록을 지원합니다.\n\n": [
+    "# Markdown converter\n\nWrite **easily** and export your document.\n\n## Tasks\n\n- [x] Enter Markdown\n- [ ] Save the result\n\n## Table\n\n| Tool | Purpose |\n| --- | --- |\n| MY POCKET UTILITY | Everyday tools |\n| Markdown | Document conversion |\n\n> Tables, checklists, quotes and code blocks are supported.\n\n",
+    "# マークダウン変換\n\n文書を**手軽に**作成して保存しましょう。\n\n## タスク\n\n- [x] マークダウンを入力\n- [ ] 結果を保存\n\n## 表\n\n| ツール | 機能 |\n| --- | --- |\n| MY POCKET UTILITY | 日常ツール集 |\n| Markdown | 文書変換 |\n\n> 表・チェックリスト・引用・コードブロックに対応。\n\n"
   ],
   "\n\n[링크 예시](https://example.com)\n": [
     "\n\n[Example link](https://example.com)\n",
@@ -2360,7 +2360,7 @@
     "フィート毎秒"
   ],
   "바이트": [
-    "Byte",
+    "Bytes",
     "バイト"
   ],
   "비트": [
@@ -2950,5 +2950,553 @@
   "이 브라우저에 도구 목록만 저장합니다. 입력 내용이나 파일은 기록하지 않으며, 다른 기기와 동기화하지 않습니다.": [
     "Only the tool list is saved in this browser. Input content and files are not recorded, and the list does not sync across devices.",
     "このブラウザにツールの一覧のみ保存します。入力内容やファイルは記録せず、他の端末とは同期しません。"
+  ],
+  "원본 경로를 붙여넣고 원하는 출력 형식을 선택하세요.": [
+    "Paste a path and choose the output format.",
+    "パスを貼り付け、出力形式を選択してください。"
+  ],
+  "출력 형식을 선택하세요": [
+    "Choose an output format",
+    "出力形式を選択"
+  ],
+  "결과를 원본으로 사용": [
+    "Use result as input",
+    "結果を入力に使用"
+  ],
+  "입력 형식과 관계없이 선택한 출력 형식으로 변환합니다. SMB와 AFP 사이의 변경도 지원하며, 한글과 공백은 그대로 유지됩니다.": [
+    "Paths are converted to your selected output format, including SMB to AFP and back. Text and spaces are preserved.",
+    "入力形式に関係なく選択した形式に変換します。SMBとAFPの相互変換に対応し、文字と空白を保持します。"
+  ],
+  "웹 주소 대신 공유 폴더 경로를 입력해 주세요.": [
+    "Enter a shared folder path instead of a web URL.",
+    "Web URLではなく共有フォルダのパスを入力してください。"
+  ],
+  "서버 이름을 입력해 주세요.": [
+    "Enter a server name.",
+    "サーバー名を入力してください。"
+  ],
+  "수강 신청, 피켓팅을 위한 정확한 시간 네이버 시간 및 정보 제공.": [
+    "Naver time and timing information for course registration and ticket booking.",
+    "履修登録やチケット予約に役立つNaver時刻と時間情報。"
+  ],
+  "시간을 설정하고 종료 알림을 받으세요.": [
+    "Set a timer and receive a completion notification.",
+    "時間を設定して終了通知を受け取りましょう。"
+  ],
+  "집중과 휴식을 나누어 나만의 리듬을 만드세요.": [
+    "Find your rhythm with focus and break intervals.",
+    "集中と休憩を分けて自分のリズムを作りましょう。"
+  ],
+  "도구를 선택합니다.": [
+    "Choose a tool.",
+    "ツールを選びます。"
+  ],
+  "시간과 알림을 설정합니다.": [
+    "Set the time and notifications.",
+    "時間と通知を設定します。"
+  ],
+  "미니 창으로 시간을 확인합니다.": [
+    "View the time in a mini window.",
+    "ミニウィンドウで時間を確認します。"
+  ],
+  "브라우저에서 시간을 확인하세요.": [
+    "Check the time in your browser.",
+    "ブラウザーで時間を確認できます。"
+  ],
+  "외부 서버 시각은 통신 지연과 서버 설정에 따라 오차가 생길 수 있습니다. 탭 종료·절전 중에는 알림이 전달되지 않을 수 있습니다.": [
+    "Server time may vary due to network latency and server configuration. Notifications may not arrive when the tab is closed or the device sleeps.",
+    "サーバー時刻は通信遅延や設定で誤差が生じます。タブを閉じたりスリープ中の場合、通知が届かないことがあります。"
+  ],
+  "서버 동기화": [
+    "Time source",
+    "時刻の同期元"
+  ],
+  "네이버 API": [
+    "Naver API",
+    "Naver API"
+  ],
+  "서버 주소 입력": [
+    "Custom server URL",
+    "サーバーURLを入力"
+  ],
+  "서버 주소": [
+    "Server URL",
+    "サーバーURL"
+  ],
+  "서버 시간 조회": [
+    "Check server time",
+    "サーバー時刻を取得"
+  ],
+  "네이버 서버 동기화": [
+    "Synced with Naver",
+    "Naverと同期済み"
+  ],
+  "입력한 서버 동기화": [
+    "Synced with custom server",
+    "入力サーバーと同期済み"
+  ],
+  "HTTP Date 헤더 기준 · 초 단위 정밀도. 외부 접근과 Date 헤더 공개를 허용한 서버만 조회할 수 있습니다.": [
+    "Based on the HTTP Date header, with one-second precision. The server must allow cross-origin requests and expose its Date header.",
+    "HTTP Dateヘッダーに基づく秒単位の時刻です。外部アクセスとDateヘッダーの公開が許可されたサーバーのみ取得できます。"
+  ],
+  "서버 시간을 읽을 수 없습니다. HTTPS 주소, 외부 접근 허용 및 Date 헤더 공개 설정을 확인해 주세요.": [
+    "Cannot read server time. Check the HTTPS URL, CORS permissions and Date header exposure.",
+    "サーバー時刻を読み取れません。HTTPS URL、CORS許可、Dateヘッダー公開設定を確認してください。"
+  ],
+  "HTTPS 서버 주소를 입력해 주세요.": [
+    "Enter an HTTPS server URL.",
+    "HTTPSのサーバーURLを入力してください。"
+  ],
+  "브라우저 알림을 표시할 수 없습니다.": [
+    "Browser notifications could not be displayed.",
+    "ブラウザー通知を表示できません。"
+  ],
+  "브라우저 알림 끄기": [
+    "Turn off browser notifications",
+    "ブラウザー通知をオフ"
+  ],
+  "브라우저 알림 켜기": [
+    "Enable browser notifications",
+    "ブラウザー通知をオン"
+  ],
+  "알림이 차단되어 있습니다. 브라우저 사이트 설정에서 허용해 주세요.": [
+    "Notifications are blocked. Allow them in your browser site settings.",
+    "通知がブロックされています。ブラウザーのサイト設定で許可してください。"
+  ],
+  "이 브라우저는 알림을 지원하지 않습니다.": [
+    "This browser does not support notifications.",
+    "このブラウザーは通知に対応していません。"
+  ],
+  "브라우저 알림 사용 중": [
+    "Browser notifications enabled",
+    "ブラウザー通知オン"
+  ],
+  "URL·OG 검사": [
+    "URL & Open Graph checker",
+    "URL・OGチェック"
+  ],
+  "공유 전 제목·설명·이미지를 확인하세요.": [
+    "Check titles, descriptions and images before sharing.",
+    "共有前にタイトル・説明・画像を確認。"
+  ],
+  "공유 전에 제목·설명·이미지와 메타 태그를 확인하세요.": [
+    "Inspect titles, descriptions, images and meta tags before sharing.",
+    "共有前にタイトル・説明・画像・メタタグを確認しましょう。"
+  ],
+  "페이지 URL을 조회하거나 HTML을 입력합니다.": [
+    "Fetch a page URL or paste its HTML.",
+    "ページURLを取得するかHTMLを入力します。"
+  ],
+  "메타 태그와 누락된 항목을 확인합니다.": [
+    "Check meta tags and missing fields.",
+    "メタタグと不足項目を確認します。"
+  ],
+  "이미지를 불러와 공유 미리보기를 확인합니다.": [
+    "Load the image to preview a shared link.",
+    "画像を読み込み共有プレビューを確認します。"
+  ],
+  "외부 접근이 막힌 사이트는 페이지 소스 HTML로 검사할 수 있습니다.": [
+    "Paste the page source HTML when cross-origin access is blocked.",
+    "外部アクセスが制限されている場合はページのHTMLソースで確認できます。"
+  ],
+  "실제 공유 화면과 같은가요?": [
+    "Does this match the actual shared preview?",
+    "実際の共有表示と同じですか？"
+  ],
+  "플랫폼의 크롭·캐시·접근 정책에 따라 실제 공유 화면은 달라질 수 있습니다.": [
+    "Actual previews depend on platform cropping, caching and access policies.",
+    "実際の表示はサービスの切り抜き・キャッシュ・アクセス制限により異なります。"
+  ],
+  "미리보기는 참고용입니다. 플랫폼의 크롭·캐시·접근 정책에 따라 실제 공유 화면은 달라질 수 있습니다.": [
+    "This preview is a guide. Actual previews depend on platform cropping, caching and access policies.",
+    "プレビューは参考です。実際の表示は各サービスの切り抜き・キャッシュ・アクセス制限により異なります。"
+  ],
+  "검사할 페이지 URL": [
+    "Page URL to inspect",
+    "確認するページURL"
+  ],
+  "조회 중…": [
+    "Fetching…",
+    "取得中…"
+  ],
+  "URL 검사": [
+    "Inspect URL",
+    "URLを確認"
+  ],
+  "브라우저가 읽을 수 있는 URL만 조회합니다. 접근이 차단되면 아래에 페이지 소스 HTML을 넣어주세요.": [
+    "Only browser-accessible URLs can be fetched. If blocked, paste the page source HTML below.",
+    "ブラウザーからアクセスできるURLのみ取得します。制限されている場合はHTMLソースを入力してください。"
+  ],
+  "HTML 붙여넣기": [
+    "Paste HTML",
+    "HTMLを貼り付け"
+  ],
+  "HTML 검사": [
+    "Inspect HTML",
+    "HTMLを確認"
+  ],
+  "HTML 파일 열기": [
+    "Open HTML file",
+    "HTMLファイルを開く"
+  ],
+  "예시 불러오기": [
+    "Load example",
+    "サンプルを読み込む"
+  ],
+  "상대 이미지 경로를 확인하려면 원본 페이지 URL도 입력하세요. HTML은 기기 안에서 분석합니다.": [
+    "Enter the original page URL to resolve relative image paths. HTML is analyzed on your device.",
+    "相対画像パスの確認には元ページのURLも入力してください。HTMLは端末内で解析します。"
+  ],
+  "공유 미리보기": [
+    "Share preview",
+    "共有プレビュー"
+  ],
+  "OG 이미지 미리보기": [
+    "OG image preview",
+    "OG画像プレビュー"
+  ],
+  "외부 이미지 불러오기": [
+    "Load external image",
+    "外部画像を読み込む"
+  ],
+  "OG 이미지 없음": [
+    "No OG image",
+    "OG画像なし"
+  ],
+  "제목 없음": [
+    "No title",
+    "タイトルなし"
+  ],
+  "설명 없음": [
+    "No description",
+    "説明なし"
+  ],
+  "점검 결과": [
+    "Check results",
+    "確認結果"
+  ],
+  "주요 OG 태그가 있습니다. 실제 공유 결과까지 보장하지는 않습니다.": [
+    "Core OG tags are present. Actual sharing results are not guaranteed.",
+    "主要OGタグがあります。実際の共有結果を保証するものではありません。"
+  ],
+  "누락": [
+    "Missing",
+    "不足"
+  ],
+  "중복 태그": [
+    "Duplicate tag",
+    "タグの重複"
+  ],
+  "유효하지 않은 URL": [
+    "Invalid URL",
+    "無効なURL"
+  ],
+  "절대 URL 권장": [
+    "Absolute URL recommended",
+    "絶対URLを推奨"
+  ],
+  "HTML은 2MB 이하로 입력해 주세요.": [
+    "HTML must be 2 MB or smaller.",
+    "HTMLは2MB以下にしてください。"
+  ],
+  "검사할 HTML을 입력해 주세요.": [
+    "Enter HTML to inspect.",
+    "確認するHTMLを入力してください。"
+  ],
+  "HTML 페이지 주소를 입력해 주세요.": [
+    "Enter an HTML page URL.",
+    "HTMLページのURLを入力してください。"
+  ],
+  "http 또는 https 페이지 주소를 입력해 주세요.": [
+    "Enter an HTTP or HTTPS page URL.",
+    "HTTPまたはHTTPSのページURLを入力してください。"
+  ],
+  "외부 접근이 차단되었거나 네트워크 오류가 발생했습니다. 페이지 소스 HTML을 붙여넣어 검사해 주세요.": [
+    "Cross-origin access was blocked or the network failed. Paste the page source HTML to inspect it.",
+    "外部アクセスの制限または通信エラーです。ページのHTMLソースを貼り付けてください。"
+  ],
+  "조회 시간이 초과되었습니다. HTML로 검사해 주세요.": [
+    "The request timed out. Inspect the HTML instead.",
+    "取得がタイムアウトしました。HTMLで確認してください。"
+  ],
+  "이미지를 불러오지 못했습니다.": [
+    "Could not load the image.",
+    "画像を読み込めませんでした。"
+  ],
+  "기준 도시와 서버 동기화 출처를 선택합니다.": [
+    "Choose a city and time source.",
+    "都市と時刻の同期元を選びます。"
+  ],
+  "서버 주소 입력을 선택하면 HTTPS 주소를 넣고 조회합니다.": [
+    "For a custom server, enter its HTTPS URL and fetch the time.",
+    "カスタムサーバーの場合はHTTPS URLを入力して取得します。"
+  ],
+  "동기화 상태를 확인하고 필요하면 재동기화합니다.": [
+    "Check sync status and resync when needed.",
+    "同期状態を確認し、必要なら再同期します。"
+  ],
+  "수강 신청이나 예약 전에 서버 시각과 연결 상태를 확인할 때 사용하세요.": [
+    "Check server time and connection status before course registration or reservations.",
+    "履修登録や予約の前にサーバー時刻と接続状態を確認できます。"
+  ],
+  "시간·분·초를 설정하고 시작을 누릅니다.": [
+    "Set hours, minutes and seconds, then start.",
+    "時・分・秒を設定して開始します。"
+  ],
+  "브라우저 알림 켜기를 눌러 알림 권한을 허용합니다.": [
+    "Enable browser notifications and grant permission.",
+    "ブラウザー通知をオンにして権限を許可します。"
+  ],
+  "진행 중에도 시간을 추가하거나 일시정지할 수 있습니다.": [
+    "Add time or pause while the timer is running.",
+    "実行中も時間を追加したり一時停止できます。"
+  ],
+  "요리나 작업 시간을 설정하고 다른 도구를 이용하는 동안 종료 알림을 받으세요.": [
+    "Set a cooking or work timer and receive a completion alert while using other tools.",
+    "料理や作業の時間を設定し、他のツールを使用中も終了通知を受け取れます。"
+  ],
+  "집중·짧은 휴식·긴 휴식 시간을 설정합니다.": [
+    "Set focus, short break and long break durations.",
+    "集中・短い休憩・長い休憩の時間を設定します。"
+  ],
+  "집중 시간을 시작하고 미니 창으로 남은 시간을 확인합니다.": [
+    "Start a focus session and watch the remaining time in a mini window.",
+    "集中を開始し、ミニウィンドウで残り時間を確認します。"
+  ],
+  "종료 알림 후 다음 단계를 눌러 휴식을 시작합니다.": [
+    "After the alert, choose the next stage to begin a break.",
+    "終了通知後、次の段階を押して休憩を開始します。"
+  ],
+  "공부나 업무에 집중한 뒤 규칙적으로 쉬는 습관을 만들 때 사용하세요.": [
+    "Build a routine of focused study or work followed by regular breaks.",
+    "勉強や仕事に集中した後、定期的に休む習慣づくりに使えます。"
+  ],
+  "단축 URL 풀기": [
+    "URL expander",
+    "短縮URLを展開"
+  ],
+  "최종 주소와 광고·추적 파라미터를 확인하세요.": [
+    "Inspect destination URLs and advertising or tracking parameters.",
+    "転送先URLと広告・追跡パラメーターを確認。"
+  ],
+  "분석할 URL": [
+    "URL to inspect",
+    "確認するURL"
+  ],
+  "파라미터 분석": [
+    "Analyze parameters",
+    "パラメーターを解析"
+  ],
+  "단축 주소 조회": [
+    "Expand short URL",
+    "短縮URLを取得"
+  ],
+  "주소 조회 시 해당 서버에 요청이 전송되어 클릭 통계에 잡힐 수 있습니다. 외부 접근을 허용한 링크만 조회할 수 있습니다. 자바스크립트 이동은 실행하지 않습니다.": [
+    "Fetching sends a request to the server and may count as a click. Only CORS-enabled links can be resolved. JavaScript redirects are not executed.",
+    "取得時にサーバーへリクエストが送信され、クリックに計上される場合があります。外部アクセス許可のあるリンクのみ取得できます。JavaScriptの転送は実行しません。"
+  ],
+  "입력 주소 분석 · 외부 요청 없음": [
+    "Input URL analysis · no external request",
+    "入力URLの解析・外部リクエストなし"
+  ],
+  "HTTP 리다이렉트 후 최종 주소": [
+    "Final URL after HTTP redirects",
+    "HTTP転送後の最終URL"
+  ],
+  "HTTP 리다이렉트 없음": [
+    "No HTTP redirect",
+    "HTTP転送なし"
+  ],
+  "최종 주소를 확인하지 못했습니다. 외부 접근 차단, 네트워크 오류 또는 시간 초과일 수 있습니다. 입력 주소의 파라미터는 별도로 분석할 수 있습니다.": [
+    "Could not resolve the destination. CORS restrictions, network errors or timeouts may be responsible. You can still analyze the input URL parameters.",
+    "最終URLを取得できませんでした。外部アクセス制限、通信エラー、タイムアウトなどが考えられます。入力URLのパラメーターは解析できます。"
+  ],
+  "확인한 주소": [
+    "Inspected URL",
+    "確認したURL"
+  ],
+  "복사에 실패했습니다. 주소를 직접 선택해 주세요.": [
+    "Copy failed. Select the URL manually.",
+    "コピーできません。URLを直接選択してください。"
+  ],
+  "도메인": [
+    "Domain",
+    "ドメイン"
+  ],
+  "경로": [
+    "Path",
+    "パス"
+  ],
+  "프래그먼트": [
+    "Fragment",
+    "フラグメント"
+  ],
+  "광고·추적 관련 파라미터가 있을 수 있습니다.": [
+    "Possible advertising or tracking parameters detected.",
+    "広告・追跡に関連する可能性のあるパラメーターがあります。"
+  ],
+  "알려진 추적 파라미터가 발견되지 않았습니다.": [
+    "No known tracking parameters detected.",
+    "既知の追跡パラメーターは見つかりませんでした。"
+  ],
+  "파라미터 이름에 따른 참고 분류입니다. 광고 여부나 링크 안전성을 보장하지 않습니다. 중간 리다이렉트 주소는 표시하지 못합니다.": [
+    "Classification is based on parameter names. It does not establish advertising status or link safety. Intermediate redirects are not available.",
+    "パラメーター名に基づく参考分類です。広告かどうか、リンクの安全性は保証しません。途中の転送先は表示できません。"
+  ],
+  "파라미터": [
+    "Parameter",
+    "パラメーター"
+  ],
+  "값": [
+    "Value",
+    "値"
+  ],
+  "분류": [
+    "Category",
+    "分類"
+  ],
+  "URL이 포함된 값 · 실제 목적지 확인 전": [
+    "Embedded URL · destination not verified",
+    "URLを含む値・転送先未確認"
+  ],
+  "파라미터가 없습니다.": [
+    "No parameters.",
+    "パラメーターはありません。"
+  ],
+  "일반 파라미터": [
+    "General parameter",
+    "一般パラメーター"
+  ],
+  "캠페인 추적": [
+    "Campaign tracking",
+    "キャンペーン追跡"
+  ],
+  "광고·클릭 추적 가능": [
+    "Possible ad or click tracking",
+    "広告・クリック追跡の可能性"
+  ],
+  "제휴·추천 코드 가능": [
+    "Possible affiliate or referral code",
+    "アフィリエイト・紹介コードの可能性"
+  ],
+  "URL을 붙여넣고 파라미터를 분석합니다.": [
+    "Paste a URL and analyze its parameters.",
+    "URLを貼り付けてパラメーターを解析します。"
+  ],
+  "단축 주소 조회를 누르면 외부 서버에 요청합니다.": [
+    "Expanding a short URL sends a request to the external server.",
+    "短縮URLの取得で外部サーバーへリクエストを送信します。"
+  ],
+  "조회에 성공하면 최종 주소의 파라미터를 확인합니다.": [
+    "When resolution succeeds, inspect the destination parameters.",
+    "取得できたら転送先のパラメーターを確認します。"
+  ],
+  "링크를 열기 전에 주소에 포함된 캠페인·추천 코드를 살펴볼 때 사용하세요.": [
+    "Inspect campaign and referral codes in a URL before opening it.",
+    "リンクを開く前にURL内のキャンペーン・紹介コードを確認できます。"
+  ],
+  "모든 단축 URL을 조회할 수 있나요?": [
+    "Can all short URLs be expanded?",
+    "すべての短縮URLを展開できますか？"
+  ],
+  "브라우저의 외부 접근 제한 때문에 일부 링크는 조회할 수 없습니다. 광고 여부나 안전성을 확정하지 않으며 조회 요청이 클릭 통계에 잡힐 수 있습니다.": [
+    "Browser restrictions block some links. This does not establish advertising status or safety, and requests may count as clicks.",
+    "ブラウザーの制限により一部リンクは取得できません。広告や安全性は確定できず、取得がクリックに計上される場合があります。"
+  ],
+  "글자수 계산기": [
+    "Character counter",
+    "文字数カウンター"
+  ],
+  "글자수부터 한글 2바이트 환산·UTF-8 용량까지 한눈에.": [
+    "Count characters, Korean 2-byte estimates and UTF-8 bytes.",
+    "文字数・韓国語2バイト換算・UTF-8サイズを一目で。"
+  ],
+  "계산할 텍스트": [
+    "Text to count",
+    "カウントするテキスト"
+  ],
+  "텍스트를 입력하거나 붙여넣으세요.": [
+    "Type or paste text.",
+    "テキストを入力または貼り付けてください。"
+  ],
+  "복사에 실패했습니다. 텍스트를 직접 선택해 주세요.": [
+    "Copy failed. Select the text manually.",
+    "コピーできません。テキストを直接選択してください。"
+  ],
+  "글자수 · 공백 포함": [
+    "Characters with whitespace",
+    "空白を含む文字数"
+  ],
+  "글자수 · 공백 제외": [
+    "Characters without whitespace",
+    "空白を除く文字数"
+  ],
+  "한글 2 · 영문 1바이트 환산": [
+    "Korean 2 / English 1 byte estimate",
+    "韓国語2・英語1バイト換算"
+  ],
+  "UTF-8 바이트": [
+    "UTF-8 bytes",
+    "UTF-8バイト数"
+  ],
+  "UTF-16 바이트": [
+    "UTF-16 bytes",
+    "UTF-16バイト数"
+  ],
+  "단어수": [
+    "Words",
+    "単語数"
+  ],
+  "줄 수": [
+    "Lines",
+    "行数"
+  ],
+  "유니코드 코드 포인트": [
+    "Unicode code points",
+    "Unicodeコードポイント"
+  ],
+  "UTF-16 코드 단위": [
+    "UTF-16 code units",
+    "UTF-16コード単位"
+  ],
+  "글자수는 화면에 보이는 문자 단위입니다. 공백 제외는 띄어쓰기·탭·줄바꿈을 제외합니다. 줄바꿈도 공백 포함 글자수에 포함합니다.": [
+    "Characters are counted as visible grapheme clusters. Whitespace-free counts omit spaces, tabs and line breaks. Line breaks count in the total.",
+    "文字数は見た目の文字単位で数えます。空白除外ではスペース・タブ・改行を除きます。改行は空白込みの文字数に含まれます。"
+  ],
+  "2바이트 환산은 ASCII 문자 1바이트, 그 외 문자 2바이트로 계산합니다. 실제 EUC-KR 인코딩이 아니며 이모지·한자도 2바이트로 환산합니다. UTF-8과 UTF-16은 BOM 없이 원문을 계산하며 줄바꿈 방식에 따라 결과가 달라집니다.": [
+    "The estimate counts ASCII as 1 byte and each other code point as 2, including emoji and CJK. It is not actual EUC-KR encoding. UTF-8 and UTF-16 sizes exclude BOM; line endings affect the result.",
+    "換算はASCIIを1バイト、それ以外のコードポイントを絵文字・漢字も含め2バイトとします。実際のEUC-KRではありません。UTF-8・UTF-16はBOMを含まず、改行形式で結果が異なります。"
+  ],
+  "제출 사이트마다 글자수·바이트 기준이 다를 수 있습니다. 텍스트는 서버에 전송하지 않습니다.": [
+    "Submission sites may use different counting rules. Text is not sent to a server.",
+    "提出先により文字数・バイト数の基準が異なります。テキストはサーバーへ送信しません。"
+  ],
+  "텍스트를 입력하거나 붙여넣습니다.": [
+    "Type or paste text.",
+    "テキストを入力または貼り付けます。"
+  ],
+  "공백 포함·제외 글자수와 바이트 수를 확인합니다.": [
+    "Compare counts with and without whitespace and byte sizes.",
+    "空白の有無による文字数とバイト数を確認します。"
+  ],
+  "제출할 사이트의 계산 기준과 비교합니다.": [
+    "Compare with the destination site's counting rules.",
+    "提出先の計算基準と比較します。"
+  ],
+  "지원서·소개문·문자 메시지처럼 길이 제한이 있는 글의 분량을 확인할 때 사용하세요.": [
+    "Check length-limited writing such as applications, bios and messages.",
+    "応募書類・紹介文・メッセージなど、長さに制限のある文章を確認できます。"
+  ],
+  "한글 2바이트 환산은 실제 파일 크기인가요?": [
+    "Is the 2-byte estimate the actual file size?",
+    "2バイト換算は実際のファイルサイズですか？"
+  ],
+  "ASCII 1바이트, 그 외 문자 2바이트를 적용한 참고값입니다. 실제 EUC-KR 인코딩은 아니며 UTF-8·UTF-16 바이트 수를 별도로 제공합니다.": [
+    "This is an estimate using 1 byte for ASCII and 2 for other code points, not actual EUC-KR. UTF-8 and UTF-16 sizes are shown separately.",
+    "ASCIIを1バイト、それ以外を2バイトとする参考値で、実際のEUC-KRではありません。UTF-8・UTF-16のサイズは別途表示します。"
+  ],
+  "Windows·SMB·AFP 등 원하는 출력 형식을 선택합니다.": [
+    "Choose the desired output format, such as Windows, SMB or AFP.",
+    "Windows・SMB・AFPなどの出力形式を選びます。"
   ]
 }

@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {countText} from '../src/text-count.mjs';
+test('Korean, ASCII, whitespace and actual encoded byte sizes are distinct',()=>{const r=countText('가A \n');assert.equal(r.characters,4);assert.equal(r.noSpaces,2);assert.equal(r.legacy,5);assert.equal(r.utf8,6);assert.equal(r.utf16Bytes,8);assert.equal(r.lines,2);assert.equal(countText('').lines,0)});
+test('emoji and combining sequences use graphemes without misrepresenting code units',()=>{const r=countText('👨‍👩‍👧‍👦e\u0301');assert.equal(r.characters,2);assert.ok(r.codePoints>r.characters);assert.ok(r.utf16>r.codePoints);assert.equal(r.utf8,Buffer.byteLength('👨‍👩‍👧‍👦e\u0301'));assert.equal(countText('a\r\nb').lines,2)});

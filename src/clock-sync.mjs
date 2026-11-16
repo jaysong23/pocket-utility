@@ -7,3 +7,9 @@ export function serverSample(data,start,end){
 }
 export const synchronizedNow=(sample,mono)=>sample.epoch+(mono-sample.mono);
 export function nextPomodoro(phase,completed,settings){const count=completed+(phase==='focus'?1:0);const next=phase==='focus'?(count%4===0?'long':'short'):'focus';return {phase:next,completed:count,ms:settings[next]*60000}}
+// HTTP Date has only one-second resolution; cached responses cannot prove current server time.
+export function httpDateSample(date,age,start,end){
+ const utc=Date.parse(date||'');
+ if(!Number.isFinite(utc)||new Date(utc).getUTCFullYear()<2020||!Number.isFinite(start)||!Number.isFinite(end)||end<start||end-start>10000||age!==null&&(!Number.isFinite(Number(age))||Number(age)>0))throw Error('Unavailable or cached server date');
+ return {epoch:utc+(end-start)/2,mono:end,rtt:end-start};
+}

@@ -1,3 +1,4 @@
+import {routeHref} from './routing.mjs';
 import { t as tr, locale, getLanguage } from "./i18n.mjs";
 import { useEffect, useRef, useState, useId } from 'react';
 import { createPortal } from 'react-dom';
@@ -110,9 +111,11 @@ function NumberStepper({
   const step = (delta: number) => onChange(String(Math.min(max, Math.max(min, (Number.isFinite(n) ? n : min) + delta))));
   return <div className="number-stepper-field"><label htmlFor={id}>{tr(label)}</label><div className="number-stepper"><input id={id} type="number" inputMode="numeric" min={min} max={max} step="1" value={value} disabled={disabled} onChange={e => onChange(e.target.value)} /><div className="number-stepper-arrows"><button type="button" aria-label={tr(`${tr(label)} ${tr('늘리기')}`)} disabled={disabled || n >= max} onClick={() => step(1)}><ChevronUp size={14} /></button><button type="button" aria-label={tr(`${tr(label)} ${tr('줄이기')}`)} disabled={disabled || n <= min} onClick={() => step(-1)}><ChevronDown size={14} /></button></div></div></div>;
 }
-export default function ClockTimer({showHeading=true}:{showHeading?:boolean}) {
-  const [tab, setTab] = useState('clock'),
-    [zone, setZone] = useState('Asia/Seoul'),
+export default function ClockTimer({showHeading=true,mode='clock'}:{showHeading?:boolean,mode?:string}) {
+  const tab=mode;
+  const [source,setSource]=useState('timeapi'),[address,setAddress]=useState(''),[serverURL,setServerURL]=useState('');
+  const [notifications,setNotifications]=useState(false),[permission,setPermission]=useState(typeof Notification==='undefined'?'unsupported':Notification.permission);
+  const [zone, setZone] = useState('Asia/Seoul'),
     [hour12, setHour12] = useState(false),
     [h, H] = useState('0'),
     [m, M] = useState('5'),
@@ -126,9 +129,11 @@ export default function ClockTimer({showHeading=true}:{showHeading?:boolean}) {
     [pip, setPip] = useState<Window | null>(null),
     [floating, setFloating] = useState(false),
     [miniTab, setMiniTab] = useState('clock');
-  const server = useServerTime();
-  const timer = useCountdown('pocket-timer', 300000, () => setAlarm('타이머가 종료되었습니다.'));
-  const pomo = useCountdown('pocket-pomodoro', 1500000, () => setAlarm(`뽀모도로 ${phaseNames[info.phase]} 시간이 끝났습니다. 다음 단계를 시작해 주세요.`));
+  const server = useServerTime(source,serverURL);
+  function finish(message:string){setAlarm(message);if(notifications&&typeof Notification!=='undefined'&&Notification.permission==='granted'){try{const notice=new Notification('MY POCKET UTILITY',{body:tr(message),tag:'pocket-'+Date.now()});notice.onclick=()=>{window.focus();notice.close()}}catch{setError('브라우저 알림을 표시할 수 없습니다.')}}}
+  async function enableNotifications(){if(typeof Notification==='undefined')return;try{const result=await Notification.requestPermission();setPermission(result);setNotifications(result==='granted')}catch{setPermission('unsupported')}}
+  const timer = useCountdown('pocket-timer', 300000, () => finish('타이머가 종료되었습니다.'));
+  const pomo = useCountdown('pocket-pomodoro', 1500000, () => finish(`뽀모도로 ${phaseNames[info.phase]} 시간이 끝났습니다. 다음 단계를 시작해 주세요.`));
   const Heading=showHeading?'h1':'h2';
   const draft = previewDuration(h, m, s);
   const shownTimerLeft = timer.state.status === 'idle' ? draft ?? 0 : timer.left;
@@ -255,7 +260,7 @@ export default function ClockTimer({showHeading=true}:{showHeading?:boolean}) {
     second: '2-digit',
     hour12
   }).format(server.now);
-  const syncLabel = server.status === 'synced' ? 'TimeAPI.io 서버 동기화' : server.status === 'syncing' ? '서버 시각 동기화 중…' : server.status === 'stale' ? '재동기화 실패 · 마지막 서버 시각으로 진행' : '동기화 실패 · 임시 기기 시각';
+  const syncLabel = server.status === 'synced' ? (source==='timeapi'?'TimeAPI.io 서버 동기화':source==='naver'?'네이버 서버 동기화':'입력한 서버 동기화') : server.status === 'syncing' ? '서버 시각 동기화 중…' : server.status === 'stale' ? '재동기화 실패 · 마지막 서버 시각으로 진행' : '동기화 실패 · 임시 기기 시각';
   const closeMini = () => {
     pip?.close();
     setPip(null);
@@ -278,7 +283,7 @@ export default function ClockTimer({showHeading=true}:{showHeading?:boolean}) {
         height: 190,
         preferInitialWindowPlacement: true
       });
-      w.document.title = tr('Pocket Utility · 미니 시계');
+      w.document.title = tr('MY POCKET UTILITY · 미니 시계');
       for (const el of document.querySelectorAll('style,link[rel="stylesheet"]')) {
         const clone = el.cloneNode(true) as HTMLElement;
         if (el instanceof HTMLLinkElement) (clone as HTMLLinkElement).href = el.href;
@@ -320,14 +325,14 @@ export default function ClockTimer({showHeading=true}:{showHeading?:boolean}) {
       setError('');
     }}>{tr(label)}</button>))}</div> : null;
   const mini = pip || floating ? <div className={'clock-mini ' + (floating ? 'clock-floating' : '')}><div className="mini-toolbar"><select aria-label={tr("미니 창 도구 선택")} value={miniTab} onChange={e => setMiniTab(e.target.value)}><option value="clock">{tr("현재 시각")}</option><option value="timer">{tr("타이머")}</option><option value="pomodoro">{tr("뽀모도로")}</option></select><button aria-label={tr("미니 창 닫기")} onClick={closeMini}><X size={18} /></button></div><p>{tr(miniTab === 'clock' ? syncLabel : miniTab === 'pomodoro' ? `${phaseNames[info.phase]} · 집중 ${info.completed}회 완료` : timer.state.status === 'running' ? '진행 중' : '타이머')}</p><strong>{tr(miniTab === 'clock' ? clock : display(miniTab === 'pomodoro' ? pomo.left : shownTimerLeft))}</strong>{tr(miniTab !== 'clock' && controls(miniTab, true))}{tr(miniTab === 'timer' && extraTime(true))}{tr(alarm && <button className="mini-alarm" onClick={() => setAlarm('')}>{tr("종료 알림 끄기")}</button>)}{tr(floating && <small>{tr("페이지 안의 미니 창 · 다른 앱 위 표시 불가")}</small>)}</div> : null;
-  return <><div className="tool-heading"><span className="eyebrow">CLOCK · TIMER · POMODORO</span><Heading>{tr("시계·타이머·뽀모도로")}</Heading><p>{tr("외부 서버 시각 확인부터 집중과 휴식까지.")}</p></div><section className="clock-workspace" ref={panel}><div className="clock-toolbar"><div className="symbol-tabs">{tr([['clock', '현재 시각'], ['timer', '타이머'], ['pomodoro', '뽀모도로']].map(([id, label]) => <button key={id} className={tab === id ? 'active' : ''} aria-pressed={tab === id} onClick={() => setTab(id)}>{tr(label)}</button>))}</div><div className="clock-window-actions"><button className="select" onClick={() => void openMini()}><PictureInPicture2 size={16} />{tr("PIP / 미니 창")}</button><button className="select" onClick={async () => {
+  return <><div className="tool-heading"><span className="eyebrow">{tab.toUpperCase()}</span><Heading>{tr(tab==='clock'?'현재 시각':tab==='timer'?'타이머':'뽀모도로')}</Heading><p>{tr(tab==='clock'?'수강 신청, 피켓팅을 위한 정확한 시간 네이버 시간 및 정보 제공.':tab==='timer'?'시간을 설정하고 종료 알림을 받으세요.':'집중과 휴식을 나누어 나만의 리듬을 만드세요.')}</p></div><section className="clock-workspace" ref={panel}><div className="clock-toolbar"><div className="symbol-tabs">{tr([['clock', '현재 시각'], ['timer', '타이머'], ['pomodoro', '뽀모도로']].map(([id, label]) => <a key={id} href={routeHref(id)} className={tab === id ? 'active' : ''} aria-current={tab===id?'page':undefined}>{tr(label)}</a>))}</div><div className="clock-window-actions"><button className="select" onClick={() => void openMini()}><PictureInPicture2 size={16} />{tr("PIP / 미니 창")}</button><button className="select" onClick={async () => {
             try {
               if (document.fullscreenElement) await document.exitFullscreen();else if (panel.current?.requestFullscreen) await panel.current.requestFullscreen();else setError('전체화면을 지원하지 않는 브라우저입니다.');
             } catch {
               setError('전체화면 전환에 실패했습니다.');
             }
           }}><Maximize size={16} />{tr("전체화면")}</button></div></div>
- {tr(tab === 'clock' ? <div className="clock-view"><div className="clock-options"><label>{tr("기준 도시")}<select value={zone} onChange={e => setZone(e.target.value)}>{tr(zones.map(([v, n]) => <option key={v} value={v}>{tr(n)}</option>))}</select></label><label><input type="checkbox" checked={hour12} onChange={e => setHour12(e.target.checked)} />{tr("12시간 표시")}</label></div><p className="clock-caption">{tr(new Intl.DateTimeFormat(locale(), {
+ {tr(tab === 'clock' ? <div className="clock-view"><div className="clock-options"><label>{tr('서버 동기화')}<select value={source} onChange={e=>setSource(e.target.value)}><option value="timeapi">TimeAPI.io</option><option value="naver">{tr('네이버 API')}</option><option value="custom">{tr('서버 주소 입력')}</option></select></label><label>{tr("기준 도시")}<select value={zone} onChange={e => setZone(e.target.value)}>{tr(zones.map(([v, n]) => <option key={v} value={v}>{tr(n)}</option>))}</select></label><label><input type="checkbox" checked={hour12} onChange={e => setHour12(e.target.checked)} />{tr("12시간 표시")}</label></div>{source==='custom'&&<form className="url-form" onSubmit={e=>{e.preventDefault();setServerURL(address)}}><input type="url" required value={address} aria-label={tr('서버 주소')} placeholder="https://example.com/" onChange={e=>setAddress(e.target.value)}/><button>{tr('서버 시간 조회')}</button></form>}{source!=='timeapi'&&<p className="clock-caption">{tr('HTTP Date 헤더 기준 · 초 단위 정밀도. 외부 접근과 Date 헤더 공개를 허용한 서버만 조회할 수 있습니다.')}</p>}{server.error&&<p role="alert">{tr(server.error)}</p>}<p className="clock-caption">{tr(new Intl.DateTimeFormat(locale(), {
             timeZone: zone,
             dateStyle: 'full'
           }).format(server.now))}</p><div className="clock-digits">{tr(clock)}</div><div className="clock-sync"><span role="status">{tr(syncLabel)}</span><button disabled={server.status === 'syncing'} onClick={() => void server.sync()}><RefreshCw size={14} />{tr("재동기화")}</button></div><p className="clock-caption">{tr(server.status === 'synced' ? `왕복 응답 ${server.rtt}ms · 5분마다 동기화 · 네트워크 지연에 따른 오차 가능` : '서버 연결 상태를 확인해 주세요.')}</p></div> : <div className="timer-view"><p className="clock-caption">{tr(tab === 'pomodoro' ? `${phaseNames[info.phase]} · 집중 ${info.completed}회 완료` : '남은 시간')}</p><div className={'clock-digits ' + (active.state.status === 'done' ? 'timer-done' : '')} role="timer">{tr(display(shownLeft))}</div><progress className="timer-progress" max={shownTotal} value={shownLeft} aria-label={tr("남은 시간")} />
@@ -351,6 +356,6 @@ export default function ClockTimer({showHeading=true}:{showHeading?:boolean}) {
               if (e.target.checked) void prepare();
             }} />{tr("종료 알림 소리")}</label><button onClick={async () => {
             if (await prepare()) beep();
-          }}><Volume2 size={15} />{tr("소리 테스트")}</button></div></div>)}
- {tr(alarm && <div className="timer-alert" role="status"><Bell size={18} /><span>{tr(alarm)}</span><button onClick={() => setAlarm('')}>{tr("알림 끄기")}</button></div>)}{tr(error && <p className="pdf-message" role="alert">{tr(error)}</p>)}</section><p className="text-tool-note">{tr("시각 출처: ")}<a href="https://timeapi.io/" target="_blank" rel="noreferrer">TimeAPI.io</a>{tr(". 국가 표준시 인증 서비스는 아니며, 통신 지연을 보정한 참고 시각입니다. 뽀모도로는 단계 종료 후 ‘다음 단계’를 누르면 이어집니다. PIP 미지원 브라우저는 페이지 안에 미니 창을 표시합니다. 타이머·뽀모도로는 같은 탭에서 새로고침해도 이어지지만, 탭 종료·기기 절전 중에는 알림이 울리지 않을 수 있습니다.")}</p>{tr(mini && createPortal(mini, pip?.document.body || document.body))}</>;
+          }}><Volume2 size={15} />{tr("소리 테스트")}</button><button disabled={permission==='unsupported'||permission==='denied'} onClick={()=>notifications?setNotifications(false):void enableNotifications()}><Bell size={15}/>{tr(notifications?'브라우저 알림 끄기':'브라우저 알림 켜기')}</button><span role="status">{tr(permission==='denied'?'알림이 차단되어 있습니다. 브라우저 사이트 설정에서 허용해 주세요.':permission==='unsupported'?'이 브라우저는 알림을 지원하지 않습니다.':notifications?'브라우저 알림 사용 중':'')}</span></div></div>)}
+ {tr(alarm && <div className="timer-alert" role="status"><Bell size={18} /><span>{tr(alarm)}</span><button onClick={() => setAlarm('')}>{tr("알림 끄기")}</button></div>)}{tr(error && <p className="pdf-message" role="alert">{tr(error)}</p>)}</section><p className="text-tool-note">{tr("시각 출처: ")}<a href={source==='timeapi'?'https://timeapi.io/':source==='naver'?'https://api.searchad.naver.com/':serverURL.startsWith('https://')?serverURL:undefined} target="_blank" rel="noreferrer">{source==='timeapi'?'TimeAPI.io':source==='naver'?'Naver':serverURL}</a>{tr(". 국가 표준시 인증 서비스는 아니며, 통신 지연을 보정한 참고 시각입니다. 뽀모도로는 단계 종료 후 ‘다음 단계’를 누르면 이어집니다. PIP 미지원 브라우저는 페이지 안에 미니 창을 표시합니다. 타이머·뽀모도로는 같은 탭에서 새로고침해도 이어지지만, 탭 종료·기기 절전 중에는 알림이 울리지 않을 수 있습니다.")}</p>{tr(mini && createPortal(mini, pip?.document.body || document.body))}</>;
 }

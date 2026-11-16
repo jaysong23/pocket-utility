@@ -11,6 +11,7 @@ const {default:App}=await import('../node_modules/.cache/pocket-interaction/app.
 test('language and category navigation preserve input; plain-text copy uses actual output',async()=>{
  const dom=new JSDOM('<meta name="site-base" content="/pocket-utility/"><meta name="site-url" content="https://example.com/pocket-utility/"><meta name="description"><meta property="og:url"><meta property="og:title"><link rel="canonical"><div id="root"></div>',{url:'https://example.com/pocket-utility/markdown/',pretendToBeVisual:true});
  const previous={};for(const key of ['window','document','history','location','localStorage','sessionStorage','Event','HTMLElement','HTMLInputElement']){previous[key]=globalThis[key];globalThis[key]=dom.window[key]}
+ const notices=[];const oldNotification=globalThis.Notification;globalThis.Notification=class {static permission='default';static async requestPermission(){this.permission='granted';return 'granted'}constructor(title,options){notices.push({title,...options})}};
  const oldFetch=globalThis.fetch,oldNavigator=Object.getOwnPropertyDescriptor(globalThis,'navigator');let copied='';
  globalThis.fetch=async()=>({ok:true,json:async()=>({year:2026,month:11,day:13,hour:1,minute:0,seconds:0,milliSeconds:0})});
  Object.defineProperty(globalThis,'navigator',{value:{clipboard:{writeText:async text=>{copied=text}}},configurable:true});
@@ -48,7 +49,7 @@ test('language and category navigation preserve input; plain-text copy uses actu
   assert.equal(document.querySelectorAll('.tool-tile').length,0);
   assert.ok(document.querySelector('.no-results button'));
   await act(async()=>document.querySelector('.no-results button').click());
-  assert.equal(document.querySelectorAll('.tool-tile').length,11);
+  assert.equal(document.querySelectorAll('.tool-tile').length,16);
   await act(async()=>document.querySelector('.recent-strip>button').click());
   assert.equal(document.querySelector('.recent-strip'),null);
   await act(async()=>window.dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'k',ctrlKey:true,bubbles:true})));
@@ -58,10 +59,30 @@ test('language and category navigation preserve input; plain-text copy uses actu
   localStorage.setItem('pocket-path-custom-protocol','');
   await act(async()=>document.querySelector('.category-nav a[href$="path-converter/"]').click());
   const paste=new Event('paste',{bubbles:true,cancelable:true});
-  Object.defineProperty(paste,'clipboardData',{value:{getData:()=> 'smb://asdfsaf'}});
+  Object.defineProperty(paste,'clipboardData',{value:{getData:()=> 'afp://naver.com'}});
   await act(async()=>document.querySelector('#path-input').dispatchEvent(paste));
-  assert.equal(document.querySelector('#path-output').value,String.raw`\\asdfsaf`);
-  assert.equal(copied,String.raw`\\asdfsaf`);
+  assert.equal(document.querySelector('#path-output').value,'smb://naver.com');
+  assert.equal(copied,'smb://naver.com');
+  await act(async()=>document.querySelector('input[name=path-protocol][value=windows]').click());
+  assert.equal(document.querySelector('#path-output').value,String.raw`\\naver.com`);
+  await act(async()=>document.querySelector('input[name=path-protocol][value=afp]').click());
+  assert.equal(document.querySelector('#path-output').value,'afp://naver.com');
+  assert.equal(localStorage.getItem('pocket-path-target'),'afp');
   assert.equal(document.querySelector('.path-error'),null);
- }finally{await act(async()=>root.unmount());globalThis.fetch=oldFetch;if(oldNavigator)Object.defineProperty(globalThis,'navigator',oldNavigator);else delete globalThis.navigator;delete globalThis.IS_REACT_ACT_ENVIRONMENT;for(const key of Object.keys(previous)){if(previous[key]===undefined)delete globalThis[key];else globalThis[key]=previous[key]}dom.window.close()}
+
+  await act(async()=>{const select=document.querySelector('.language-switch select');select.value='en';select.dispatchEvent(new Event('change',{bubbles:true}))});
+  await act(async()=>document.querySelector('.category-nav a[href$="timer/"]').click());
+  assert.equal(document.querySelector('h1').textContent,'Timer');
+  const button=text=>[...document.querySelectorAll('button')].find(b=>b.textContent===text);
+  await act(async()=>button('Enable browser notifications').click());
+  assert.ok(button('Turn off browser notifications'));
+  await act(async()=>document.querySelector('.timer-sound input').click());
+  await act(async()=>document.querySelector('.timer-presets button').click());
+  await act(async()=>document.querySelector('.timer-primary').click());
+  await act(async()=>document.querySelector('.category-nav a[href$="clock/"]').click());
+  assert.equal(document.querySelector('h1').textContent,'Current time');
+  const realNow=Date.now;try{Date.now=()=>realNow()+61000;await act(async()=>new Promise(resolve=>setTimeout(resolve,250)));assert.equal(notices.length,1);assert.equal(notices[0].title,'MY POCKET UTILITY');await act(async()=>new Promise(resolve=>setTimeout(resolve,250)));assert.equal(notices.length,1)}finally{Date.now=realNow}
+  await act(async()=>document.querySelector('.category-nav a[href$="url-linter/"]').click());
+  await act(async()=>button('Load example').click());await act(async()=>button('Inspect HTML').click());assert.ok(document.querySelector('.og-share-card'));assert.equal(document.querySelector('.og-share-card img'),null);
+ }finally{await act(async()=>root.unmount());globalThis.fetch=oldFetch;if(oldNotification===undefined)delete globalThis.Notification;else globalThis.Notification=oldNotification;if(oldNavigator)Object.defineProperty(globalThis,'navigator',oldNavigator);else delete globalThis.navigator;delete globalThis.IS_REACT_ACT_ENVIRONMENT;for(const key of Object.keys(previous)){if(previous[key]===undefined)delete globalThis[key];else globalThis[key]=previous[key]}dom.window.close()}
 });

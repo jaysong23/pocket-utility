@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Copy, Download, Upload, FileCode2 } from 'lucide-react';
 import { createMarkdownConverter, htmlDocument, plainTextFromHTML, MAX_MARKDOWN } from './markdown.mjs';
 const fence = String.fromCharCode(96).repeat(3);
-const sampleText = () => tr('# 마크다운을 HTML로\n\n문서를 **간편하게** 작성하고 웹페이지로 저장하세요.\n\n## 할 일\n\n- [x] 마크다운 입력하기\n- [ ] HTML로 저장하기\n\n## 표\n\n| 도구 | 기능 |\n| --- | --- |\n| Pocket Utility | 일상 도구 모음 |\n| MD → HTML | 문서 변환 |\n\n> 표, 체크리스트, 인용문, 코드블록을 지원합니다.\n\n') + fence + 'javascript\nconst message = "Hello, Pocket Utility!";\nconsole.log(message);\n' + fence + tr('\n\n[링크 예시](https://example.com)\n');
+const sampleText = () => tr('# 마크다운을 HTML로\n\n문서를 **간편하게** 작성하고 웹페이지로 저장하세요.\n\n## 할 일\n\n- [x] 마크다운 입력하기\n- [ ] HTML로 저장하기\n\n## 표\n\n| 도구 | 기능 |\n| --- | --- |\n| MY POCKET UTILITY | 일상 도구 모음 |\n| MD → HTML | 문서 변환 |\n\n> 표, 체크리스트, 인용문, 코드블록을 지원합니다.\n\n') + fence + 'javascript\nconst message = "Hello, MY POCKET UTILITY!";\nconsole.log(message);\n' + fence + tr('\n\n[링크 예시](https://example.com)\n');
 export default function MarkdownConverter() {
   const [input, setInput] = useState(sampleText),
     [settled, setSettled] = useState(sampleText),

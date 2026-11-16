@@ -1,4 +1,4 @@
-# Pocket Utility
+# MY POCKET UTILITY
 
 회원가입 없이 사용하는 한국어 유틸리티 모음입니다.
 
@@ -61,3 +61,12 @@ GitHub `main` 업데이트 시 자동으로 테스트 → 빌드 → Pages 배�
 - /markdown/ exports styled HTML, body HTML or plain text (.txt). /md-to-html/ remains a legacy alias.
 - All visitor file conversion runs in the browser. Static site generation never processes visitor files.
 - Tests cover calculations, localized rendering, language/menu interactions, plain text export and generated SEO pages.
+
+## Browser-only URL and time tools
+
+- Separate `/clock/`, `/timer/`, `/pomodoro/` routes share a persistent countdown component; `/clock-timer/` remains a legacy alias.
+- TimeAPI.io uses its UTC JSON API. Naver and custom HTTPS servers use CORS-readable HTTP `Date` headers. Naver Search Ads root currently does not expose the required CORS headers, so its option can report failure. No proxy, API secret, or backend is used. HTTP Date is second-resolution and may represent an edge/CDN rather than the application server. Failed source switches clear the previous sample.
+- Browser notifications require explicit permission and the tab to remain active enough to execute timers. They are not background push notifications.
+- `/url-linter/` analyzes inert HTML locally, with optional CORS-enabled URL fetching and explicit image loading.
+- `/url-expander/` analyzes query parameters locally or follows readable HTTP redirects on request. It does not execute destination JavaScript, expose intermediate redirects, or certify advertising status/safety. Fetching may count as a click; CORS restrictions prevent resolving many short links including some bit.ly links.
+- `/character-counter/` reports graphemes, whitespace-free counts, words, lines, Unicode code points, UTF-16 code units, UTF-8/UTF-16 bytes (no BOM), and an ASCII=1/non-ASCII=2 estimate. The estimate is not EUC-KR encoding.

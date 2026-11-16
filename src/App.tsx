@@ -1,3 +1,6 @@
+import UrlExpander from './UrlExpander';
+import CharacterCounter from './CharacterCounter';
+import UrlLinter from './UrlLinter';
 import ToolDirectory, {FavoriteButton, recordTool, openToolSearch} from './ToolDirectory';
 import {rememberLanguage} from './language-preference.mjs';
 import { t as tr, locale, getLanguage } from "./i18n.mjs";
@@ -17,7 +20,7 @@ import {dateLabel} from './i18n.mjs';
 import {normalizeWeekQuery} from './week-input.mjs';
 import { holidayName } from './holidays.mjs';
 import { koreaToday, isoWeek, searchWeek, dateKey, addDays, fromWeek, weeksInYear } from './week.mjs';
-const tools = [{
+const tools = [{id:'url-expander',name:'단축 URL 풀기',english:'URL EXPANDER',category:'텍스트·경로',text:'최종 주소와 광고·추적 파라미터를 확인하세요.',Icon:Search,color:'blue',tags:['URL','파라미터']},{id:'character-counter',name:'글자수 계산기',english:'CHARACTER COUNTER',category:'텍스트·경로',text:'글자수부터 한글 2바이트 환산·UTF-8 용량까지 한눈에.',Icon:Search,color:'purple',tags:['UTF-8','바이트']},{id:'url-linter',name:'URL·OG 검사',english:'URL LINTER',category:'텍스트·경로',text:'공유 전 제목·설명·이미지를 확인하세요.',Icon:Search,color:'blue',tags:['Open Graph','HTML 검사']},{
   id: 'markdown',
   name: '마크다운 변환',
   english: 'MARKDOWN CONVERTER',
@@ -108,15 +111,7 @@ const tools = [{
   color: 'orange',
   tags: ['페이지별 변환', '전체 다운로드']
 }, {
-  id: 'clock-timer',
-  name: '시계·타이머·뽀모도로',
-  english: 'CLOCK & POMODORO',
-  category: '날짜·시간',
-  text: '서버 시각과 나만의 집중 시간.\nPIP 미니 창으로 언제나 가까이.',
-  Icon: Timer,
-  color: 'purple',
-  tags: ['서버 시각', '뽀모도로 · PIP']
-}];
+id:'clock',name:'현재 시각',english:'CLOCK',category:'날짜·시간',text:'수강 신청, 피켓팅을 위한 정확한 시간 네이버 시간 및 정보 제공.',Icon:Timer,color:'purple',tags:['PIP']}, {id:'timer',name:'타이머',english:'TIMER',category:'날짜·시간',text:'시간을 설정하고 종료 알림을 받으세요.',Icon:Timer,color:'purple',tags:['PIP']}, {id:'pomodoro',name:'뽀모도로',english:'POMODORO',category:'날짜·시간',text:'집중과 휴식을 나누어 나만의 리듬을 만드세요.',Icon:Timer,color:'purple',tags:['PIP']}];
 function usePreference(key: string, fallback: string) {
   const [value, setValue] = useState(() => {
     try {
@@ -223,7 +218,7 @@ function WeekNumber({
 
 function Navigation({route,language}:{route:string;language:string}){
  useEffect(()=>{const close=(e:any)=>{if(e.type==='keydown'&&e.key!=='Escape')return;if(e.type==='click'&&e.target.closest('.category-nav')&&!e.target.closest('a'))return;document.querySelectorAll('.category-nav details[open]').forEach(d=>d.removeAttribute('open'))};document.addEventListener('click',close);document.addEventListener('keydown',close);return()=>{document.removeEventListener('click',close);document.removeEventListener('keydown',close)}},[]);
- return <><a className="skip-link" href="#main-content">{tr('본문으로 이동')}</a><header className="site-header"><div className="nav-inner"><a className="logo" href={routeHref()}><span className="logo-mark"><Command size={22}/></span>pocket<span>utility</span><em>BETA</em></a><nav className="category-nav" aria-label={tr('주요 메뉴')}><a href={routeHref()} aria-current={route==='home'?'page':undefined}>{tr('모든 도구')}</a>{['이미지','날짜·시간','텍스트·경로','계산·변환'].map(cat=><details key={cat} onToggle={e=>{if(e.currentTarget.open)document.querySelectorAll('.category-nav details[open]').forEach(d=>{if(d!==e.currentTarget)d.removeAttribute('open')})}}><summary className={tools.find(tool=>tool.id===route)?.category===cat?'active':''}>{tr(cat)}<ChevronRight size={12}/></summary><div className="category-dropdown">{tools.filter(tool=>tool.category===cat).map(tool=><a key={tool.id} href={routeHref(tool.id)} aria-current={route===tool.id?'page':undefined}>{tr(tool.name)}</a>)}</div></details>)}</nav><div className="nav-actions"><button className="nav-search" onClick={openToolSearch} aria-label={tr("도구 검색")}><Search size={18}/></button><ThemeToggle/><label className="language-switch"><span className="sr-only">{tr('언어 선택')}</span><select value={language} aria-label={tr('언어 선택')} onChange={e=>{rememberLanguage(e.target.value);navigate(routeHref(route==='home'?'':route,getQuery(),e.target.value))}}><option value="ko" lang="ko">한국어</option><option value="en" lang="en">English</option><option value="ja" lang="ja">日本語</option></select></label></div></div></header></>;
+ return <><a className="skip-link" href="#main-content">{tr('본문으로 이동')}</a><header className="site-header"><div className="nav-inner"><a className="logo" href={routeHref()}><span className="logo-mark"><Command size={22}/></span>MY POCKET <span>UTILITY</span><em>BETA</em></a><nav className="category-nav" aria-label={tr('주요 메뉴')}><a href={routeHref()} aria-current={route==='home'?'page':undefined}>{tr('모든 도구')}</a>{['이미지','날짜·시간','텍스트·경로','계산·변환'].map(cat=><details key={cat} onToggle={e=>{if(e.currentTarget.open)document.querySelectorAll('.category-nav details[open]').forEach(d=>{if(d!==e.currentTarget)d.removeAttribute('open')})}}><summary className={tools.find(tool=>tool.id===route)?.category===cat?'active':''}>{tr(cat)}<ChevronRight size={12}/></summary><div className="category-dropdown">{tools.filter(tool=>tool.category===cat).map(tool=><a key={tool.id} href={routeHref(tool.id)} aria-current={route===tool.id?'page':undefined}>{tr(tool.name)}</a>)}</div></details>)}</nav><div className="nav-actions"><button className="nav-search" onClick={openToolSearch} aria-label={tr("도구 검색")}><Search size={18}/></button><ThemeToggle/><label className="language-switch"><span className="sr-only">{tr('언어 선택')}</span><select value={language} aria-label={tr('언어 선택')} onChange={e=>{rememberLanguage(e.target.value);navigate(routeHref(route==='home'?'':route,getQuery(),e.target.value))}}><option value="ko" lang="ko">한국어</option><option value="en" lang="en">English</option><option value="ja" lang="ja">日本語</option></select></label></div></div></header></>;
 }
 
 export default function App() {
@@ -252,7 +247,7 @@ export default function App() {
   }, []);
 
   const selected = tools.find(t => t.id === route);
-  return <div className="site"><Navigation route={route} language={language}/><main className="shell" id="main-content">{tr(route === 'home' ? <ToolDirectory tools={tools}/> : selected ? <><nav className="breadcrumbs" aria-label={tr("탐색 경로")}><a href={routeHref()}>{tr("모든 도구")}</a><span aria-hidden="true">/</span><span aria-current="page">{tr(selected.name)}</span><FavoriteButton id={selected.id}/></nav>{tr(route === 'markdown' ? <MarkdownConverter /> : route === 'weeknumber' ? <WeekNumber query={query} /> : route === 'path-converter' ? <PathConverter /> : route === 'symbols' ? <Symbols /> : route === 'insta-fonts' ? <InstaFonts /> : route === 'currency' ? <CurrencyConverter /> : route === 'units' ? <UnitConverter /> : route === 'pdf-to-jpg' ? <PdfConverter /> : route === 'clock-timer' ? null : <><div className="tool-heading"><span className="eyebrow">{tr("IMAGE CONVERTER")}</span><h1>{tr("이미지 변환")}</h1><p>{tr("HEIC·WebP·JPG·PNG 이미지를 원하는 형식으로 변환하세요.")}</p></div><Converter kind={route as 'webp' | 'heic'} key={route} /></>)}</> : <div className="no-results"><h1>{tr("도구를 찾을 수 없어요.")}</h1><a href={routeHref()}>{tr("모든 도구로 돌아가기")}</a></div>)}<div hidden={route !== 'clock-timer'}><ClockTimer showHeading={route==='clock-timer'}/></div>{tr(guides[route] && <div dangerouslySetInnerHTML={{
+  return <div className="site"><Navigation route={route} language={language}/><main className="shell" id="main-content">{tr(route === 'home' ? <ToolDirectory tools={tools}/> : selected ? <><nav className="breadcrumbs" aria-label={tr("탐색 경로")}><a href={routeHref()}>{tr("모든 도구")}</a><span aria-hidden="true">/</span><span aria-current="page">{tr(selected.name)}</span><FavoriteButton id={selected.id}/></nav>{tr(route === 'url-expander' ? <UrlExpander /> : route === 'character-counter' ? <CharacterCounter /> : route === 'url-linter' ? <UrlLinter /> : route === 'markdown' ? <MarkdownConverter /> : route === 'weeknumber' ? <WeekNumber query={query} /> : route === 'path-converter' ? <PathConverter /> : route === 'symbols' ? <Symbols /> : route === 'insta-fonts' ? <InstaFonts /> : route === 'currency' ? <CurrencyConverter /> : route === 'units' ? <UnitConverter /> : route === 'pdf-to-jpg' ? <PdfConverter /> : ['clock','timer','pomodoro'].includes(route) ? null : <><div className="tool-heading"><span className="eyebrow">{tr("IMAGE CONVERTER")}</span><h1>{tr("이미지 변환")}</h1><p>{tr("HEIC·WebP·JPG·PNG 이미지를 원하는 형식으로 변환하세요.")}</p></div><Converter kind={route as 'webp' | 'heic'} key={route} /></>)}</> : <div className="no-results"><h1>{tr("도구를 찾을 수 없어요.")}</h1><a href={routeHref()}>{tr("모든 도구로 돌아가기")}</a></div>)}<div hidden={!['clock','timer','pomodoro'].includes(route)}><ClockTimer mode={['clock','timer','pomodoro'].includes(route)?route:'clock'} showHeading={['clock','timer','pomodoro'].includes(route)}/></div>{tr(guides[route] && <div dangerouslySetInnerHTML={{
         __html: guideHTML(route,language)
-      }} />)}{selected&&<section className="related-tools"><h2>{tr("관련 도구")}</h2><div>{tools.filter(tool=>tool.category===selected.category&&tool.id!==route).map(tool=><a key={tool.id} href={routeHref(tool.id)}>{tr(tool.name)}</a>)}</div></section>}</main><footer className="site-footer"><div><a href={routeHref()}>pocket utility</a><span>{tr("작은 도구, 더 편리한 일상.")}</span></div><span>© {tr(today.getUTCFullYear())} Pocket Utility</span></footer></div>;
+      }} />)}{selected&&<section className="related-tools"><h2>{tr("관련 도구")}</h2><div>{tools.filter(tool=>tool.category===selected.category&&tool.id!==route).map(tool=><a key={tool.id} href={routeHref(tool.id)}>{tr(tool.name)}</a>)}</div></section>}</main><footer className="site-footer"><div><a href={routeHref()}>MY POCKET UTILITY</a><span>{tr("작은 도구, 더 편리한 일상.")}</span></div><span>© {tr(today.getUTCFullYear())} MY POCKET UTILITY</span></footer></div>;
 }
