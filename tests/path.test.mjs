@@ -30,3 +30,13 @@ test('custom protocols normalize and round trip without opening links',()=>{
  assert.equal(convertPath(unc,'custom','NFS://').output,'nfs://NAS/공유 폴더');
  for(const invalid of ['', '1nfs','nfs/path','nfs host'])assert.throws(()=>convertPath(unc,'custom',invalid));
 });
+test('server-only SMB input ignores unrelated custom output settings',()=>{
+ for(const [protocol,custom] of [['smb',''],['afp',''],['none',''],['custom',''],['custom','1invalid']]){
+  const result=convertPath('smb://asdfsaf',protocol,custom);
+  assert.equal(result.output,'\\\\asdfsaf');assert.equal(result.direction,'Mac → Windows');
+  assert.equal(convertPath('afp://asdfsaf',protocol,custom).output,'\\\\asdfsaf');
+ }
+ assert.equal(convertPath('\\\\asdfsaf').output,'smb://asdfsaf');
+ assert.equal(convertPath('//asdfsaf','custom','').output,'\\\\asdfsaf');
+ assert.throws(()=>convertPath('\\\\asdfsaf','custom',''));
+});

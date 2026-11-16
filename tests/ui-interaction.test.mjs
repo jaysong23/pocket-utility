@@ -54,5 +54,14 @@ test('language and category navigation preserve input; plain-text copy uses actu
   await act(async()=>window.dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'k',ctrlKey:true,bubbles:true})));
   await new Promise(resolve=>setTimeout(resolve,10));
   assert.equal(document.activeElement.id,'tool-finder');
+  localStorage.setItem('pocket-path-protocol','custom');
+  localStorage.setItem('pocket-path-custom-protocol','');
+  await act(async()=>document.querySelector('.category-nav a[href$="path-converter/"]').click());
+  const paste=new Event('paste',{bubbles:true,cancelable:true});
+  Object.defineProperty(paste,'clipboardData',{value:{getData:()=> 'smb://asdfsaf'}});
+  await act(async()=>document.querySelector('#path-input').dispatchEvent(paste));
+  assert.equal(document.querySelector('#path-output').value,String.raw`\\asdfsaf`);
+  assert.equal(copied,String.raw`\\asdfsaf`);
+  assert.equal(document.querySelector('.path-error'),null);
  }finally{await act(async()=>root.unmount());globalThis.fetch=oldFetch;if(oldNavigator)Object.defineProperty(globalThis,'navigator',oldNavigator);else delete globalThis.navigator;delete globalThis.IS_REACT_ACT_ENVIRONMENT;for(const key of Object.keys(previous)){if(previous[key]===undefined)delete globalThis[key];else globalThis[key]=previous[key]}dom.window.close()}
 });
