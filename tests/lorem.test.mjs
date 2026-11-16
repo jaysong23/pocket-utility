@@ -13,3 +13,15 @@ test('default filler is Latin and word/character limits are exact',()=>{
  assert.equal(generateFiller('la','words',Infinity).split(/\s+/).length,1);
  assert.equal(Array.from(generateFiller('ko','characters',20000)).length,10000);
 });
+
+test('localized long output varies structures and avoids repeated sentences',()=>{
+ const seeded=()=>{let seed=731;return ()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296}};
+ for(const language of ['ko','ja']){
+  const text=generateLorem(language,20,10,seeded());
+  const sentences=text.split(language==='ja'?'。':'.').map(s=>s.trim()).filter(Boolean);
+  assert.equal(sentences.length,200);assert.equal(new Set(sentences).size,200);
+  const lengths=sentences.map(s=>Array.from(s).length);assert.ok(Math.max(...lengths)-Math.min(...lengths)>25);
+  assert.ok(!text.includes('undefined'));assert.ok(!/[a-z]/i.test(text));
+  const words=generateFiller(language,'words',1000,4,seeded());assert.equal(words.split(/\s+/).length,1000);
+ }
+});
