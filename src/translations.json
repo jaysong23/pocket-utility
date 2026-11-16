@@ -3498,5 +3498,25 @@
   "Windows·SMB·AFP 등 원하는 출력 형식을 선택합니다.": [
     "Choose the desired output format, such as Windows, SMB or AFP.",
     "Windows・SMB・AFPなどの出力形式を選びます。"
+  ],
+  "최종 URL 확인": [
+    "Resolve destination URL",
+    "最終URLを確認"
+  ],
+  "파라미터만 분석": [
+    "Analyze parameters only",
+    "パラメーターのみ解析"
+  ],
+  "최종 목적지 URL": [
+    "Destination URL",
+    "最終転送先URL"
+  ],
+  "입력한 URL · 목적지 미확인": [
+    "Input URL · destination not verified",
+    "入力URL・転送先未確認"
+  ],
+  "이 주소에는 파라미터가 없습니다.": [
+    "This URL has no parameters.",
+    "このURLにはパラメーターがありません。"
   ]
 }
