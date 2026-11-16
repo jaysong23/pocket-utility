@@ -9,6 +9,7 @@ import {pagePath} from '../src/seo.mjs';
 test('51 localized static pages have unique metadata, semantic content and share images',()=>{
  for(const site of ['https://example.com/','https://jaysong23.github.io/pocket-utility/']){
   execFileSync(process.execPath,['scripts/build.mjs'],{env:{...process.env,SITE_URL:site}});
+  const version=JSON.parse(readFileSync('dist/version.json','utf8'));assert.match(version.commit,/^[a-f0-9]{40}$/);assert.ok(Number.isFinite(Date.parse(version.builtAt)));
   const canonicals=new Set();
   for(const lang of ['ko','en','ja'])for(const id of ['',...Object.keys(guides)]){
    const html=readFileSync('dist/'+pagePath(id,lang)+'index.html','utf8'),dom=new JSDOM(html);const d=dom.window.document;

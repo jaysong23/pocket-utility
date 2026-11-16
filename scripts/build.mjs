@@ -1,3 +1,4 @@
+import {execFileSync} from 'node:child_process';
 import {build} from 'esbuild';
 import {mkdir,readFile,writeFile,rm,cp} from 'node:fs/promises';
 import {guides,guideHTML,escapeHTML as esc} from '../src/guides.mjs';
@@ -31,3 +32,7 @@ await cp('public/og','dist/og',{recursive:true});await writeFile('dist/.nojekyll
 console.log('Generated '+routes.length*languages.length+' localized static pages for '+site.href);
 
 for(const lang of languages){const dir='dist/'+pagePath('clock-timer',lang);await mkdir(dir,{recursive:true});await writeFile(dir+'index.html',await readFile('dist/'+pagePath('clock',lang)+'index.html','utf8'))}
+
+let revision=process.env.CF_PAGES_COMMIT_SHA||process.env.GITHUB_SHA||'';
+try { revision=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(); } catch {}
+await writeFile('dist/version.json',JSON.stringify({commit:revision,builtAt:new Date().toISOString()}));

@@ -65,31 +65,36 @@ export default function Converter({
     [loadingUrl, setLoadingUrl] = useState(false),
     [urlError, setUrlError] = useState('');
   const input = useRef<HTMLInputElement>(null);
-  const seq = useRef(0);
+  const seq = useRef(0), mounted = useRef(true), generation = useRef(0);
   const add = async (files: FileList | File[]) => {
+    const ticket = generation.current;
     const next: Item[] = [];
     let errors = 0;
     for (const original of Array.from(files)) {
       try {
         const type = await detectImageType(original);
+        if (!mounted.current || ticket !== generation.current) break;
         if (!type || (from !== 'auto' && type !== from)) { errors++; continue; }
         const file = new File([original], original.name, {type: imageMime(type), lastModified: original.lastModified});
         next.push({id: ++seq.current, file, preview: URL.createObjectURL(file), status: '변환 대기'});
       } catch { errors++; }
     }
+    if (!mounted.current || ticket !== generation.current) { next.forEach(i => URL.revokeObjectURL(i.preview)); return; }
     setItems(old => [...old, ...next]);
     setNotice(errors ? `지원하지 않거나 FROM 선택과 다른 파일 ${errors}개를 제외했습니다.` : '');
   };
   const urlController = useRef<AbortController | null>(null);
   const latest = useRef(items);
   latest.current = items;
-  useEffect(() => () => {
+  useEffect(() => { mounted.current = true; return () => {
+    mounted.current = false;
+    generation.current++;
     urlController.current?.abort();
     latest.current.forEach(i => {
       URL.revokeObjectURL(i.preview);
       if (i.url) URL.revokeObjectURL(i.url);
     });
-  }, []);
+  }; }, []);
   const loadUrl = async () => {
     setUrlError('');
     let parsed: URL;
@@ -122,6 +127,7 @@ export default function Converter({
         name = decodeURIComponent(parsed.pathname.split('/').pop() || name).replace(/[<>:"/\\|?*]/g, '_').slice(-100);
       } catch {}
       if (!name.toLowerCase().endsWith('.webp')) name += '.webp';
+      if (!mounted.current) return;
       const file = new File([blob], name, {
         type: 'image/webp'
       });
@@ -135,10 +141,11 @@ export default function Converter({
       setNotice('링크 이미지를 추가했습니다. 변환하기를 눌러주세요.');
       setImageUrl('');
     } catch (e) {
+      if (!mounted.current) return;
       setUrlError(e instanceof TypeError ? '이 사이트가 외부 접근을 막았거나 네트워크 오류가 발생했습니다. 이미지 주소를 새 탭에서 열어 저장한 후 파일로 추가해 주세요.' : (e as Error).name === 'AbortError' ? '불러오기 시간이 초과됐습니다. 다시 시도해 주세요.' : (e as Error).message);
     } finally {
       clearTimeout(timer);
-      setLoadingUrl(false);
+      if (mounted.current) setLoadingUrl(false);
       urlController.current = null;
     }
   };
@@ -149,6 +156,7 @@ export default function Converter({
     return false;
   }));
   const clear = () => {
+    generation.current++;
     items.forEach(i => {
       URL.revokeObjectURL(i.preview);
       if (i.url) URL.revokeObjectURL(i.url);
@@ -166,15 +174,18 @@ export default function Converter({
     setBusy(true);
     setNotice('');
     for (const item of items) {
+      if (!mounted.current) break;
       setItems(old => old.map(i => i.id === item.id ? {
         ...i,
         status: '변환 중…',
         error: undefined
       } : i));
       let bitmap: ImageBitmap | undefined;
+      let canvas: HTMLCanvasElement | undefined;
       try {
         if (from !== 'auto' && fileType(item.file) !== from) throw new Error('FROM 포맷과 다른 파일입니다. 자동 감지를 선택해 주세요.');
         const bytes = new Uint8Array(await item.file.arrayBuffer());
+        if (!mounted.current) break;
         let animated = false;
         for (let p = 12; fileType(item.file) === 'webp' && p + 8 <= bytes.length;) {
           const type = String.fromCharCode(...bytes.slice(p, p + 4));
@@ -193,14 +204,17 @@ export default function Converter({
             status: 'HEIC 변환 중…'
           } : i));
           const decoder = await loadHeic();
+          if (!mounted.current) break;
           source = await decoder({
             blob: item.file,
             type: 'image/png'
           });
         }
+        if (!mounted.current) break;
         bitmap = await createImageBitmap(source);
+        if (!mounted.current) break;
         if (bitmap.width * bitmap.height > 40000000) throw new Error('40메가픽셀 이하 이미지를 사용해 주세요.');
-        const canvas = document.createElement('canvas');
+        canvas = document.createElement('canvas');
         canvas.width = bitmap.width;
         canvas.height = bitmap.height;
         const ctx = canvas.getContext('2d');
@@ -212,6 +226,7 @@ export default function Converter({
         ctx.drawImage(bitmap, 0, 0);
         const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(new Error('변환에 실패했습니다.')), format === 'jpg' ? 'image/jpeg' : format === 'webp' ? 'image/webp' : 'image/png', quality / 100));
         if (blob.type !== (format === 'jpg' ? 'image/jpeg' : 'image/' + format)) throw new Error('이 브라우저에서 선택한 출력 포맷을 지원하지 않습니다.');
+        if (!mounted.current) break;
         const url = URL.createObjectURL(blob);
         if (item.url) URL.revokeObjectURL(item.url);
         setItems(old => old.map(i => i.id === item.id ? {
@@ -224,6 +239,7 @@ export default function Converter({
         canvas.width = 0;
         canvas.height = 0;
       } catch (e) {
+        if (!mounted.current) break;
         if (item.url) URL.revokeObjectURL(item.url);
         setItems(old => old.map(i => i.id === item.id ? {
           ...i,
@@ -233,10 +249,15 @@ export default function Converter({
         } : i));
       } finally {
         bitmap?.close();
+        if (canvas) { canvas.width = 0; canvas.height = 0; }
       }
     }
-    setBusy(false);
+    if (mounted.current) setBusy(false);
   };
+  const invalidateResults = () => setItems(old => old.map(i => {
+    if (i.url) URL.revokeObjectURL(i.url);
+    return {...i,url:undefined,size:undefined,name:undefined,status:'변환 대기',error:undefined};
+  }));
   const done = items.filter(i => i.url);
   return <div className="converter"><section className="workspace"><div className="main-panel"><div className={'dropzone ' + (drag ? 'drag' : '')} onDragOver={e => {
           e.preventDefault();
@@ -263,7 +284,7 @@ export default function Converter({
                   error: undefined
                 };
               }));
-            }}><option value="jpg">JPG</option><option value="png">PNG</option><option value="webp">WebP</option></select></label></div><p className="format-hint">{tr("여러 포맷이 섞여 있다면 자동 감지를 선택하세요.")}</p><label className="label second">02 <b>{tr(format !== 'png' ? '이미지 품질' : '배경 처리')}</b>{tr(format !== 'png' && <strong>{tr(quality)}%</strong>)}</label>{tr(format !== 'png' ? <><input aria-label={tr("이미지 품질")} disabled={busy} className="slider" type="range" min="10" max="100" value={quality} onChange={e => setQuality(+e.target.value)} /><div className="range-label"><span>{tr("작은 용량")}</span><span>{tr("높은 품질")}</span></div><p className="setting-note">{tr(format === 'jpg' ? '투명한 영역은 흰색으로 저장됩니다.' : '투명 배경을 유지하며 용량을 줄여요.')}</p></> : <div className="png-note"><Check size={17} />{tr(" 투명 배경을 그대로 유지해요")}<p>{tr("PNG는 품질 손실 없이 저장됩니다.")}</p></div>)}<div className="actions"><button disabled={!items.length || busy || loadingUrl} className="convert" onClick={convert}>{tr(busy ? '이미지를 변환하고 있어요…' : `${items.length ? items.length + '개 이미지 ' : ''}변환하기`)}<ArrowUpRight size={20} /></button><button className="download" disabled={!done.length || busy} onClick={async () => {
+            }}><option value="jpg">JPG</option><option value="png">PNG</option><option value="webp">WebP</option></select></label></div><p className="format-hint">{tr("여러 포맷이 섞여 있다면 자동 감지를 선택하세요.")}</p><label className="label second">02 <b>{tr(format !== 'png' ? '이미지 품질' : '배경 처리')}</b>{tr(format !== 'png' && <strong>{tr(quality)}%</strong>)}</label>{tr(format !== 'png' ? <><input aria-label={tr("이미지 품질")} disabled={busy} className="slider" type="range" min="10" max="100" value={quality} onChange={e => { setQuality(+e.target.value); invalidateResults(); }} /><div className="range-label"><span>{tr("작은 용량")}</span><span>{tr("높은 품질")}</span></div><p className="setting-note">{tr(format === 'jpg' ? '투명한 영역은 흰색으로 저장됩니다.' : '투명 배경을 유지하며 용량을 줄여요.')}</p></> : <div className="png-note"><Check size={17} />{tr(" 투명 배경을 그대로 유지해요")}<p>{tr("PNG는 품질 손실 없이 저장됩니다.")}</p></div>)}<div className="actions"><button disabled={!items.length || busy || loadingUrl} className="convert" onClick={convert}>{tr(busy ? '이미지를 변환하고 있어요…' : `${items.length ? items.length + '개 이미지 ' : ''}변환하기`)}<ArrowUpRight size={20} /></button><button className="download" disabled={!done.length || busy} onClick={async () => {
             for (const i of done) {
               download(i);
               await new Promise(r => setTimeout(r, 350));

@@ -21,7 +21,7 @@ function useCountdown(key: string, initial: number, onDone: () => void) {
   const [state, setState] = useState(() => {
       try {
         const raw = sessionStorage.getItem(key);
-        return raw ? restore(raw, Date.now()) : change({}, {
+        return raw ? restore(raw, Date.now(), initial) : change({}, {
           type: 'set',
           ms: initial
         }, Date.now());
