@@ -21,7 +21,7 @@ import {dateLabel} from './i18n.mjs';
 import {normalizeWeekQuery} from './week-input.mjs';
 import { holidayName } from './holidays.mjs';
 import { koreaToday, isoWeek, searchWeek, dateKey, addDays, fromWeek, weeksInYear } from './week.mjs';
-const tools = [{id:'lorem-ipsum',name:'Lorem ipsum 생성기',english:'LOREM IPSUM GENERATOR',category:'텍스트·경로',text:'한글·영어·일본어 예시 문장을 간편하게 생성하세요.',Icon:Type,color:'purple',tags:['KO / EN / JA']},{id:'url-expander',name:'단축 URL 풀기',english:'URL EXPANDER',category:'텍스트·경로',text:'최종 주소와 광고·추적 파라미터를 확인하세요.',Icon:Search,color:'blue',tags:['URL','파라미터']},{id:'character-counter',name:'글자수 계산기',english:'CHARACTER COUNTER',category:'텍스트·경로',text:'글자수부터 한글 2바이트 환산·UTF-8 용량까지 한눈에.',Icon:Search,color:'purple',tags:['UTF-8','바이트']},{id:'url-linter',name:'메타태그 검사',english:'META TAG CHECKER',category:'텍스트·경로',text:'공유 전 제목·설명·이미지를 확인하세요.',Icon:Search,color:'blue',tags:['Open Graph','HTML 검사']},{
+const tools = [{id:'lorem-ipsum',name:'Lorem ipsum 생성기',english:'LOREM IPSUM GENERATOR',category:'텍스트·경로',text:'의미에 집중하지 않고 레이아웃을 확인하는 더미 텍스트를 생성하세요.',Icon:Type,color:'purple',tags:['LA / KO / JA']},{id:'url-expander',name:'단축 URL 풀기',english:'URL EXPANDER',category:'텍스트·경로',text:'최종 주소와 광고·추적 파라미터를 확인하세요.',Icon:Search,color:'blue',tags:['URL','파라미터']},{id:'character-counter',name:'글자수 계산기',english:'CHARACTER COUNTER',category:'텍스트·경로',text:'글자수부터 한글 2바이트 환산·UTF-8 용량까지 한눈에.',Icon:Search,color:'purple',tags:['UTF-8','바이트']},{id:'url-linter',name:'메타태그 검사',english:'META TAG CHECKER',category:'텍스트·경로',text:'공유 전 제목·설명·이미지를 확인하세요.',Icon:Search,color:'blue',tags:['Open Graph','HTML 검사']},{
   id: 'markdown',
   name: '마크다운 변환',
   english: 'MARKDOWN CONVERTER',

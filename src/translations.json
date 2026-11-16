@@ -3678,5 +3678,37 @@
   "한국어": [
     "Korean",
     "韓国語"
+  ],
+  "라틴어 · Lorem ipsum": [
+    "Latin · Lorem ipsum",
+    "ラテン語 · Lorem ipsum"
+  ],
+  "분량 기준": [
+    "Length unit",
+    "分量の単位"
+  ],
+  "분량": [
+    "Amount",
+    "分量"
+  ],
+  "단어 수": [
+    "Words",
+    "単語数"
+  ],
+  "글자 수": [
+    "Characters",
+    "文字数"
+  ],
+  "의미에 집중하지 않고 레이아웃을 확인하는 더미 텍스트를 생성하세요.": [
+    "Generate dummy text to focus on layout rather than meaning.",
+    "意味に気を取られずレイアウトを確認するためのダミーテキストを生成します。"
+  ],
+  "글자 수는 공백·문장부호를 포함합니다. 단어 수는 공백 기준이며, 일본어는 문장 단위로 구분합니다.": [
+    "Characters include spaces and punctuation. Words are space-separated; Japanese uses sentence units.",
+    "文字数は空白と句読点を含みます。単語数は空白で区切り、日本語は文単位で数えます。"
+  ],
+  "라틴어 기반 Lorem ipsum과 의미가 이어지지 않는 한글·일본어 문구를 브라우저에서 조합합니다. 입력값을 외부 서버에 보내지 않습니다.": [
+    "Latin-based Lorem ipsum and unrelated Korean or Japanese phrases are combined in your browser. No input is sent to an external server.",
+    "ラテン語のLorem ipsumと意味がつながらない韓国語・日本語のフレーズをブラウザー内で組み合わせます。入力は外部サーバーに送信しません。"
   ]
 }
