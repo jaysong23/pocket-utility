@@ -20,5 +20,21 @@
         "period": 60
       }
     }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "VISITOR_COUNTER",
+        "class_name": "VisitorCounter"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "visitor-counter-v1",
+      "new_sqlite_classes": [
+        "VisitorCounter"
+      ]
+    }
   ]
 }

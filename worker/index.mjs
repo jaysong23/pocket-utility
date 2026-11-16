@@ -1,4 +1,5 @@
 import {visitorStats} from './visitor-stats.mjs';
+export {VisitorCounter} from './visitor-stats.mjs';
 import {httpDateSample} from '../src/clock-sync.mjs';
 const REDIRECTS=new Set([301,302,303,307,308]);
 export class ResolveError extends Error{constructor(code,status=400){super(code);this.code=code;this.status=status}}

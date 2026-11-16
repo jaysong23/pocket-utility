@@ -80,4 +80,6 @@ Google Tag Manager `GTM-TWZHXWH8` is installed through the shared HTML template.
 
 Service pages: `/about/`, `/privacy/`, `/contact/` plus English/Japanese routes, all linked from the footer and sitemap (63 canonical localized pages). Contact uses a direct mailto link to `jihoon.song@hotmail.com` with a localized `[MPU]` subject. No message form is present. No mail API, server form endpoint, CAPTCHA or automatic email sending is used. The privacy policy describes current local conversion, URL proxy requests, GA4, browser storage and mailbox handling; analytics retention remains controlled in the owner's GA4 settings.
 
-The expanded footer includes cached GA4 visitor aggregates. Runtime `GA4_PROPERTY_ID` and secret `GA4_SERVICE_ACCOUNT` are required; see [GA4 counter setup](docs/GA4-VISITOR-COUNTER.md). Until connected, no visitor numbers are fabricated. Cache hits avoid Google queries, but stats requests still count as Worker invocations.
+The footer uses our own visitor counter, independent of GA4 and Cloudflare Analytics. One visit per browser per Korea-time day; the total sums daily visits. A SQLite Durable Object serializes deduplication and increments. Browser storage avoids repeat writes and edge caching reduces aggregate reads. See [counter details](docs/VISITOR-COUNTER.md). No Google service-account setup is needed. Existing GTM collection remains unchanged.
+
+AdSense account verification meta tag `ca-pub-1071029697771585` is included in the shared HTML head. This verifies account association; it does not enable ad placement or imply approval.

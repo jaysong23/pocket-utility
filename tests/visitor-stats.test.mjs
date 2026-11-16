@@ -1,27 +1,42 @@
-import test from 'node:test';import assert from 'node:assert/strict';
-import {readVisitors,visitorStats,analyticsToken} from '../worker/visitor-stats.mjs';
-const report=(n)=>({metricHeaders:[{name:'totalUsers'}],rows:[{metricValues:[{value:String(n)}]}],metadata:{timeZone:'Asia/Seoul'}});
-const response=()=>new Response(JSON.stringify({reports:[report(12),report(35)]}));
-const env={GA4_PROPERTY_ID:'12345',GA4_SERVICE_ACCOUNT:JSON.stringify({client_email:'test@example.com',private_key:'test'})};
-function cache(){const entries=new Map();return {match:async k=>entries.get(k.url)?.clone(),put:async(k,r)=>entries.set(k.url,r.clone())}}
-test('counts use distinct users across the full period, not daily sums, filtered to this site',async()=>{
- const result=await readVisitors({property:'12345',startDate:'2026-11-16',host:'mypocketutility.com',token:'test',fetcher:async(url,opts)=>{assert.equal(url,'https://analyticsdata.googleapis.com/v1beta/properties/12345:batchRunReports');const body=JSON.parse(opts.body);assert.equal(body.requests[0].dateRanges[0].startDate,'today');assert.equal(body.requests[1].dateRanges[0].startDate,'2026-11-16');assert.deepEqual(body.requests[1].metrics,[{name:'totalUsers'}]);assert.equal(body.requests[1].dimensions,undefined);assert.deepEqual(body.requests[0].dimensionFilter.filter.inListFilter.values,['mypocketutility.com','www.mypocketutility.com']);return response()}});
- assert.equal(result.today,12);assert.equal(result.total,35);assert.equal(result.timeZone,'Asia/Seoul');
+import test from 'node:test';import assert from 'node:assert/strict';import {DatabaseSync} from 'node:sqlite';
+import {VisitorCounter,visitorStats,koreaDay} from '../worker/visitor-stats.mjs';
+import {loadVisitorStats} from '../src/visitor-client.mjs';
+function instance(){
+ const db=new DatabaseSync(':memory:');let alarm=null;
+ const storage={sql:{exec(query,...args){const st=db.prepare(query);return st.columns().length?st.all(...args):(st.run(...args),[]);}},transactionSync(fn){db.exec('BEGIN');try{const r=fn();db.exec('COMMIT');return r;}catch(e){db.exec('ROLLBACK');throw e;}},getAlarm:async()=>alarm,setAlarm:async value=>{alarm=value;}};
+ return {counter:new VisitorCounter({storage}),storage,db};
+}
+const request=(id)=>new Request('https://counter.internal/',id?{method:'POST',body:id}:{});
+test('duplicate IDs and concurrent retries only count once; second visitor increments',async()=>{
+ const {counter,db}=instance();try{
+  await Promise.all(Array.from({length:8},()=>counter.fetch(request('a'.repeat(64)))));
+  let r=await (await counter.fetch(request())).json();assert.equal(r.today,1);assert.equal(r.total,1);
+  r=await (await counter.fetch(request('b'.repeat(64)))).json();assert.equal(r.today,2);assert.equal(r.total,2);
+  assert.equal((await counter.fetch(request('invalid'))).status,400);
+ }finally{db.close();}
 });
-test('unconfigured counter never requests GA and does not invent zero visitors',async()=>{
- const r=await visitorStats(new Request('https://mypocketutility.com/api/visitor-stats'),{}, {fetcher:()=>{throw Error('unexpected fetch')}});assert.deepEqual(await r.json(),{status:'not_configured'});
+test('Korea midnight resets daily count and deletes identifiers while retaining total',async()=>{
+ assert.equal(koreaDay(Date.parse('2026-11-16T14:59:59Z')),'2026-11-16');assert.equal(koreaDay(Date.parse('2026-11-16T15:00:00Z')),'2026-11-17');
+ const {counter,storage,db}=instance();try{await counter.fetch(request('a'.repeat(64)));storage.transactionSync(()=>counter.rollover('2099-01-01'));assert.equal([...storage.sql.exec('SELECT * FROM seen')].length,0);const row=[...storage.sql.exec('SELECT * FROM totals')][0];assert.equal(row.today,0);assert.equal(row.total,1);}finally{db.close();}
 });
-test('cached stats reuse results across query strings and cache failures without leaking credentials',async()=>{
- const c=cache();let reads=0,tokens=0;const deps={cache:c,fetcher:async()=>{reads++;return response()},tokenProvider:async()=>{tokens++;return 'private-token'}};
- const req=()=>new Request('https://mypocketutility.com/api/visitor-stats?random='+Math.random());
- await Promise.all([visitorStats(req(),env,deps),visitorStats(req(),env,deps)]);const r=await visitorStats(req(),env,deps);assert.equal((await r.json()).total,35);assert.equal(reads,1);assert.equal(tokens,1);
- const fail={...deps,cache:cache(),tokenProvider:async()=>{throw Error('secret-private-key')}};const a=await visitorStats(req(),env,fail);assert.deepEqual(await a.json(),{status:'unavailable'});const b=await visitorStats(req(),env,{...fail,tokenProvider:()=>{throw Error('should be cached')}});assert.deepEqual(await b.json(),{status:'unavailable'});
+test('endpoint rejects cross-origin and malformed IDs, hashes identifiers, caches only reads',async()=>{
+ let calls=0,lastBody;const entries=new Map(),cache={match:async k=>entries.get(k.url)?.clone(),put:async(k,r)=>entries.set(k.url,r.clone())};
+ const env={VISITOR_COUNTER:{idFromName:name=>name,get:()=>({fetch:async r=>{calls++;lastBody=await r.text();return new Response(JSON.stringify({status:'ok',today:1,total:1}));}})},URL_RATE_LIMITER:{limit:async()=>({success:true})}};
+ const url='https://mypocketutility.com/api/visitor-stats';const post=origin=>new Request(url,{method:'POST',headers:{origin,'x-visitor-id':'11111111-1111-4111-a111-111111111111'}});
+ assert.equal((await visitorStats(post('https://other.com'),env,{cache})).status,403);assert.equal(calls,0);
+ await visitorStats(post('https://mypocketutility.com'),env,{cache});assert.match(lastBody,/^[a-f0-9]{64}$/);assert.equal(entries.size,0);
+ await visitorStats(new Request(url),env,{cache});await visitorStats(new Request(url+'?random=123'),env,{cache});assert.equal(calls,2);
+ assert.equal((await visitorStats(new Request(url),{})).status,503);
 });
-test('malformed reports are not displayed as zero',async()=>{
- await assert.rejects(()=>readVisitors({property:'123',token:'test',fetcher:async()=>new Response(JSON.stringify({reports:[{},{}]}))}),/INVALID_REPORT/);
+test('client registers once, refresh reads, next day registers, unavailable storage never counts',async()=>{
+ const values=new Map(),storage={getItem:k=>values.get(k),setItem:(k,v)=>values.set(k,v)};const methods=[];
+ const fetcher=async(_,options)=>{methods.push(options.method);return new Response(JSON.stringify({status:'ok',today:1,total:1}));};
+ await Promise.all([loadVisitorStats({storage,fetcher,day:'2026-11-16'}),loadVisitorStats({storage,fetcher,day:'2026-11-16'})]);assert.deepEqual(methods,['POST']);
+ await loadVisitorStats({storage,fetcher,day:'2026-11-16'});await loadVisitorStats({storage,fetcher,day:'2026-11-17'});assert.deepEqual(methods,['POST','GET','POST']);
+ await loadVisitorStats({storage:{getItem(){throw Error();}},fetcher});assert.equal(methods.at(-1),'GET');
 });
-test('service-account assertion is signed and uses read-only Google scope',async()=>{
- const keys=await crypto.subtle.generateKey({name:'RSASSA-PKCS1-v1_5',modulusLength:2048,publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign','verify']);
- const exported=await crypto.subtle.exportKey('pkcs8',keys.privateKey);const pem='-----BEGIN PRIVATE KEY-----\n'+Buffer.from(exported).toString('base64')+'\n-----END PRIVATE KEY-----';
- const result=await analyticsToken({client_email:'test@example.com',private_key:pem},async(url,options)=>{assert.equal(url,'https://oauth2.googleapis.com/token');const jwt=options.body.get('assertion'),[header,claims,signature]=jwt.split('.');const payload=JSON.parse(Buffer.from(claims,'base64url'));assert.equal(payload.scope,'https://www.googleapis.com/auth/analytics.readonly');assert.equal(payload.exp-payload.iat,3600);assert.ok(await crypto.subtle.verify('RSASSA-PKCS1-v1_5',keys.publicKey,Buffer.from(signature,'base64url'),new TextEncoder().encode(header+'.'+claims)));return new Response(JSON.stringify({access_token:'test-token'}))});assert.equal(result,'test-token');
+test('failed registration retries the same ID without marking it counted',async()=>{
+ const values=new Map(),storage={getItem:k=>values.get(k),setItem:(k,v)=>values.set(k,v)};let first;
+ await assert.rejects(()=>loadVisitorStats({storage,fetcher:async(_,opts)=>{first=opts.headers['x-visitor-id'];return new Response('',{status:503});}}));
+ await loadVisitorStats({storage,fetcher:async(_,opts)=>{assert.equal(opts.headers['x-visitor-id'],first);return new Response(JSON.stringify({status:'ok'}));}});
 });

@@ -3818,5 +3818,13 @@
   "설치 없이, 브라우저에서 가볍게.": [
     "No installation. Just your browser.",
     "インストール不要、ブラウザーで手軽に。"
+  ],
+  "누적 방문": [
+    "Total visits",
+    "累計訪問"
+  ],
+  "하루 한 번, 브라우저 기준 · 누적은 일별 합계": [
+    "Once per browser per day · Total sums daily visits",
+    "1ブラウザーにつき1日1回 · 累計は日別の合計"
   ]
 }

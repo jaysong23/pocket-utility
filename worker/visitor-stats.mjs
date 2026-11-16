@@ -1,52 +1,53 @@
-const TTL=1800;
-const inFlight=new Map();
-const b64=value=>btoa(typeof value==='string'?value:String.fromCharCode(...new Uint8Array(value))).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
-export async function analyticsToken(account,fetcher,signal){
- const iat=Math.floor(Date.now()/1000);
- const header=b64(JSON.stringify({alg:'RS256',typ:'JWT'}));
- const claims=b64(JSON.stringify({iss:account.client_email,scope:'https://www.googleapis.com/auth/analytics.readonly',aud:'https://oauth2.googleapis.com/token',iat,exp:iat+3600}));
- const pem=account.private_key.replace(/-----[^-]+-----/g,'').replace(/\s/g,'');
- const key=await crypto.subtle.importKey('pkcs8',Uint8Array.from(atob(pem),c=>c.charCodeAt(0)),{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['sign']);
- const signature=await crypto.subtle.sign('RSASSA-PKCS1-v1_5',key,new TextEncoder().encode(header+'.'+claims));
- const response=await fetcher('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'urn:ietf:params:oauth:grant-type:jwt-bearer',assertion:header+'.'+claims+'.'+b64(signature)}),signal});
- if(!response.ok)throw Error('AUTH_FAILED');const data=await response.json();if(typeof data.access_token!=='string'||!data.access_token)throw Error('AUTH_FAILED');return data.access_token;
-}
-export async function readVisitors({property,startDate,host,token,fetcher=fetch,signal}){
- const report=start=>({dateRanges:[{startDate:start,endDate:'today'}],metrics:[{name:'totalUsers'}],dimensionFilter:{filter:{fieldName:'hostName',inListFilter:{values:[host,'www.'+host]}}}});
- const response=await fetcher(`https://analyticsdata.googleapis.com/v1beta/properties/${property}:batchRunReports`,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({requests:[report('today'),report(startDate)]}),signal});
- if(!response.ok)throw Error('REPORT_FAILED');const data=await response.json();if(data.reports?.length!==2)throw Error('INVALID_REPORT');
- const count=report=>{
-  if(report.metricHeaders?.[0]?.name!=='totalUsers')throw Error('INVALID_REPORT');
-  const value=report.rows?.length?report.rows[0].metricValues?.[0]?.value:(!report.rows?.length&&(report.rowCount===0||report.rowCount===undefined))?'0':undefined;
-  if(!/^\d+$/.test(value||''))throw Error('INVALID_REPORT');const n=Number(value);if(!Number.isSafeInteger(n))throw Error('INVALID_REPORT');return n;
- };
- const today=count(data.reports[0]),total=count(data.reports[1]);
- return {status:'ok',today,total,startDate,updatedAt:new Date().toISOString(),timeZone:data.reports[0].metadata?.timeZone||null,limited:data.reports.some(r=>r.metadata?.subjectToThresholding||r.metadata?.samplingMetadatas?.length)};
-}
-const json=(data,seconds=300,status=200)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':`public, max-age=${seconds}`,'X-Content-Type-Options':'nosniff'}});
-export async function visitorStats(request,env,{cache=globalThis.caches?.default,fetcher=fetch,tokenProvider=analyticsToken}={}){
- if(request.method!=='GET'&&request.method!=='HEAD')return json({status:'unavailable'},0,405);
- const head=request.method==='HEAD',finish=response=>head?new Response(null,{status:response.status,headers:response.headers}):response;
- const property=env.GA4_PROPERTY_ID,startDate=env.GA4_START_DATE||'2026-11-16',host=env.GA4_SITE_HOST||'mypocketutility.com';
- if(!property||!env.GA4_SERVICE_ACCOUNT)return finish(json({status:'not_configured'},600));
- let account;try{account=JSON.parse(env.GA4_SERVICE_ACCOUNT)}catch{return finish(json({status:'unavailable'},600))}
- if(!/^\d+$/.test(property)||!/^\d{4}-\d{2}-\d{2}$/.test(startDate)||!Number.isFinite(Date.parse(startDate))||!/^[a-z0-9.-]+$/.test(host)||!account.client_email||!account.private_key)return finish(json({status:'unavailable'},600));
- // One canonical cache key: client query parameters never select reports or bypass caching.
- const key=new Request('https://'+host+'/__visitor-stats-v1/'+property+'/'+startDate);
- let cached;try{cached=await cache?.match(key)}catch{}if(cached){const response=new Response(cached.body,cached);response.headers.set('Cache-Control','public, max-age=300');return finish(response)}
- if(!inFlight.has(key.url)){
-  inFlight.set(key.url,(async()=>{
-   let result,seconds=TTL;
-   const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),8000);
-   try{
-    if(env.URL_RATE_LIMITER){const limit=await env.URL_RATE_LIMITER.limit({key:'ga4-refresh'});if(!limit.success)throw Error('RATE_LIMITED')}
-    const token=await tokenProvider(account,fetcher,ctl.signal);
-    result=await readVisitors({property,startDate,host,token,fetcher,signal:ctl.signal});
-   }catch{result={status:'unavailable'};seconds=900}finally{clearTimeout(timer)}
-   // Negative cache also prevents repeated auth/API errors from hammering Google.
-   const response=json(result,seconds);try{await cache?.put(key,response.clone())}catch{}
-   return result;
-  })().finally(()=>inFlight.delete(key.url)));
+export const koreaDay=(now=Date.now())=>new Date(now+9*3600000).toISOString().slice(0,10);
+const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
+// A single durable instance serializes all count updates; daily IDs expire at midnight KST.
+export class VisitorCounter {
+ constructor(state){
+  this.state=state;this.sql=state.storage.sql;
+  this.sql.exec('CREATE TABLE IF NOT EXISTS totals (id INTEGER PRIMARY KEY CHECK(id=1), day TEXT NOT NULL, today INTEGER NOT NULL, total INTEGER NOT NULL, start TEXT NOT NULL)');
+  this.sql.exec('CREATE TABLE IF NOT EXISTS seen (hash TEXT PRIMARY KEY)');
  }
- return finish(json(await inFlight.get(key.url)));
+ async alarm(){this.state.storage.transactionSync(()=>this.rollover(koreaDay()));}
+ rollover(day){
+  this.sql.exec('INSERT OR IGNORE INTO totals VALUES(1,?,0,0,?)',day,day);
+  const row=[...this.sql.exec('SELECT * FROM totals WHERE id=1')][0];
+  if(row.day!==day){this.sql.exec('DELETE FROM seen');this.sql.exec('UPDATE totals SET day=?,today=0 WHERE id=1',day);}
+ }
+ async fetch(request){
+  const day=koreaDay(),hash=request.method==='POST'?await request.text():null;
+  if(hash!==null&&!/^[a-f0-9]{64}$/.test(hash))return json({status:'unavailable'},400);
+  let row;
+  this.state.storage.transactionSync(()=>{
+   this.rollover(day);
+   if(hash){
+    const found=[...this.sql.exec('SELECT hash FROM seen WHERE hash=?',hash)].length;
+    if(!found){this.sql.exec('INSERT INTO seen VALUES(?)',hash);this.sql.exec('UPDATE totals SET today=today+1,total=total+1 WHERE id=1');}
+   }
+   row=[...this.sql.exec('SELECT * FROM totals WHERE id=1')][0];
+  });
+  if(hash&&!await this.state.storage.getAlarm())await this.state.storage.setAlarm(Date.parse(day+'T00:00:00+09:00')+86400000);
+  return json({status:'ok',today:row.today,total:row.total,startDate:row.start,timeZone:'Asia/Seoul',updatedAt:new Date().toISOString()});
+ }
+}
+export async function visitorStats(request,env,{cache=globalThis.caches?.default}={}){
+ const url=new URL(request.url),method=request.method;
+ if(!['GET','POST','HEAD'].includes(method))return json({status:'unavailable'},405);
+ if(!env.VISITOR_COUNTER)return json({status:'unavailable'},503);
+ try{
+  let hash;
+  if(method==='POST'){
+   if(request.headers.get('origin')!==url.origin||request.headers.get('sec-fetch-site')==='cross-site')return json({status:'unavailable'},403);
+   // The ID is a fixed-size header, not an unbounded request body. No IP/fingerprint is stored.
+   const id=request.headers.get('x-visitor-id');if(!/^[a-f0-9-]{36}$/.test(id||''))return json({status:'unavailable'},400);
+   if(env.URL_RATE_LIMITER){const {success}=await env.URL_RATE_LIMITER.limit({key:'counter:'+ (request.headers.get('CF-Connecting-IP')||'unknown')});if(!success)return json({status:'unavailable'},429);}
+   hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(koreaDay()+':'+id))),x=>x.toString(16).padStart(2,'0')).join('');
+  }
+  const key=new Request(url.origin+'/__counter-cache-v1/'+koreaDay());
+  if(!hash){let hit;try{hit=await cache?.match(key)}catch{}if(hit)return method==='HEAD'?new Response(null,{headers:hit.headers}):hit;}
+  const stub=env.VISITOR_COUNTER.get(env.VISITOR_COUNTER.idFromName('site-visitors-v1'));
+  const result=await stub.fetch(new Request('https://counter.internal/',{method:hash?'POST':'GET',...(hash?{body:hash}:{})}));
+  if(!result.ok)return json({status:'unavailable'},503);
+  if(!hash){const cached=new Response(result.clone().body,result);cached.headers.set('Cache-Control','public, max-age=60');try{await cache?.put(key,cached)}catch{}}
+  return method==='HEAD'?new Response(null,{headers:result.headers}):result;
+ }catch{return json({status:'unavailable'},503);}
 }
