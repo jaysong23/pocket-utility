@@ -95,7 +95,7 @@ export default function MarkdownConverter() {
         }}><option value="document">{tr("스타일 포함 완성형 HTML")}</option><option value="body">{tr("본문 HTML만")}</option><option value="plain">Plain Text (.txt)</option></select></label><label>{tr("문서 제목")}<input disabled={mode==='plain'} value={title} maxLength={160} onChange={e => {
           setTitle(e.target.value);
           setStatus('');
-        }} /></label><label>{tr("파일 이름")}<input value={filename} maxLength={100} onChange={e => setFilename(e.target.value)} /><span>{mode==='plain'?'.txt':'.html'}</span></label></div>
+        }} /></label><label>{tr("파일 이름")}<span className="md-filename-field"><input value={filename} maxLength={100} onChange={e => setFilename(e.target.value)} /><span className="md-extension" aria-hidden="true">{mode==='plain'?'.txt':'.html'}</span></span></label></div>
  <div className="md-editor"><section className="md-pane"><div className="md-pane-head"><h2><FileCode2 size={17} />Markdown</h2><label className="md-upload"><Upload size={14} />{tr("파일 불러오기")}<input type="file" accept=".md,.markdown,.txt,text/markdown,text/plain" onChange={e => {
               void loadFile(e.target.files?.[0]);
               e.target.value = '';
