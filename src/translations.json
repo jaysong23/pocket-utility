@@ -3710,5 +3710,25 @@
   "라틴어 기반 Lorem ipsum과 의미가 이어지지 않는 한글·일본어 문구를 브라우저에서 조합합니다. 입력값을 외부 서버에 보내지 않습니다.": [
     "Latin-based Lorem ipsum and unrelated Korean or Japanese phrases are combined in your browser. No input is sent to an external server.",
     "ラテン語のLorem ipsumと意味がつながらない韓国語・日本語のフレーズをブラウザー内で組み合わせます。入力は外部サーバーに送信しません。"
+  ],
+  "알림 테스트": [
+    "Test notification",
+    "通知テスト"
+  ],
+  "알림 권한이 없습니다. 브라우저 사이트 설정에서 허용해 주세요.": [
+    "Notification permission is missing. Allow notifications in your browser site settings.",
+    "通知の権限がありません。ブラウザーのサイト設定で許可してください。"
+  ],
+  "테스트 알림을 요청했습니다. 보이지 않으면 OS 알림 설정과 집중 모드를 확인해 주세요.": [
+    "Test notification requested. If it is not visible, check OS notification settings and Focus / Do Not Disturb.",
+    "テスト通知をリクエストしました。表示されない場合はOSの通知設定と集中モードを確認してください。"
+  ],
+  "브라우저 알림이 켜졌습니다. 타이머가 끝나면 알려드릴게요.": [
+    "Browser notifications are enabled. We will notify you when the timer ends.",
+    "ブラウザー通知を有効にしました。タイマー終了時にお知らせします。"
+  ],
+  "브라우저 알림 테스트입니다.": [
+    "This is a browser notification test.",
+    "ブラウザー通知のテストです。"
   ]
 }

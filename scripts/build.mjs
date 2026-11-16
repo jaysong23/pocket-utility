@@ -38,3 +38,5 @@ try { revision=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim()
 await writeFile('dist/version.json',JSON.stringify({commit:revision,builtAt:new Date().toISOString()}));
 
 await cp('public/icons','dist/icons',{recursive:true});await cp('public/favicon.ico','dist/favicon.ico');
+
+await cp('public/notification-sw.js','dist/notification-sw.js');

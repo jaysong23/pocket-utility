@@ -73,3 +73,5 @@ GitHub `main` 업데이트 시 자동으로 테스트 → 빌드 → Pages 배�
 
 - `/lorem-ipsum/`: local Latin Lorem ipsum (default), semantically unrelated Korean and Japanese filler; 1–20 paragraphs, 1–10 sentences per paragraph, or exact space-separated word/Unicode character counts (Japanese word mode uses sentence units), copy and TXT download.
 - Favicon and GNB share the pocket icon. Naver site verification is embedded in the static HTML head.
+
+Browser notifications remember explicit on/off preferences, recheck permission on focus, and offer an immediate test. An active notification-only service worker is preferred, with the desktop Notification constructor as fallback. It does not cache pages, schedule background timers or add a push server. OS notification banners, Focus/Do Not Disturb, suspended tabs and device sleep can still prevent or delay visible alerts. Automated tests verify API requests; native OS banners require a device-level check.

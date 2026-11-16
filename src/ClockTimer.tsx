@@ -1,4 +1,5 @@
-import {routeHref} from './routing.mjs';
+import {notificationPermission,notificationsEnabled,saveNotificationPreference,sendBrowserNotification} from './notifications.mjs';
+import {routeHref,siteBase} from './routing.mjs';
 import { t as tr, locale, getLanguage } from "./i18n.mjs";
 import { useEffect, useRef, useState, useId } from 'react';
 import { createPortal } from 'react-dom';
@@ -114,7 +115,7 @@ function NumberStepper({
 export default function ClockTimer({showHeading=true,mode='clock'}:{showHeading?:boolean,mode?:string}) {
   const tab=mode;
   const [source,setSource]=useState('timeapi'),[address,setAddress]=useState(''),[serverURL,setServerURL]=useState('');
-  const [notifications,setNotifications]=useState(false),[permission,setPermission]=useState(typeof Notification==='undefined'?'unsupported':Notification.permission);
+  const [notifications,setNotifications]=useState(notificationsEnabled),[permission,setPermission]=useState(notificationPermission),[notificationStatus,setNotificationStatus]=useState('');
   const [zone, setZone] = useState('Asia/Seoul'),
     [hour12, setHour12] = useState(false),
     [h, H] = useState('0'),
@@ -130,8 +131,24 @@ export default function ClockTimer({showHeading=true,mode='clock'}:{showHeading?
     [floating, setFloating] = useState(false),
     [miniTab, setMiniTab] = useState('clock');
   const server = useServerTime(source,serverURL);
-  function finish(message:string){setAlarm(message);if(notifications&&typeof Notification!=='undefined'&&Notification.permission==='granted'){try{const notice=new Notification('MY POCKET UTILITY',{body:tr(message),tag:'pocket-'+Date.now()});notice.onclick=()=>{window.focus();notice.close()}}catch{setError('브라우저 알림을 표시할 수 없습니다.')}}}
-  async function enableNotifications(){if(typeof Notification==='undefined')return;try{const result=await Notification.requestPermission();setPermission(result);setNotifications(result==='granted')}catch{setPermission('unsupported')}}
+  function toggleNotifications(enabled:boolean){setNotifications(enabled);saveNotificationPreference(enabled);setNotificationStatus('')}
+  async function notify(message:string,test=false){
+    try{await sendBrowserNotification(tr(message),{base:siteBase(),url:new URL(routeHref(tab==='pomodoro'?'pomodoro':'timer'),location.origin).href});if(test)setNotificationStatus('테스트 알림을 요청했습니다. 보이지 않으면 OS 알림 설정과 집중 모드를 확인해 주세요.')}
+    catch(e){setError((e as Error).message)}
+  }
+  function finish(message:string){setAlarm(message);if(notifications)void notify(message)}
+  async function enableNotifications(){
+    if(typeof Notification==='undefined')return;
+    setError('');
+    try{const result=await Notification.requestPermission();setPermission(result);toggleNotifications(result==='granted');if(result==='granted')await notify('브라우저 알림이 켜졌습니다. 타이머가 끝나면 알려드릴게요.',true)}
+    catch{setError('브라우저 알림을 표시할 수 없습니다.')}
+  }
+  useEffect(()=>{
+    const refresh=()=>{setPermission(notificationPermission());setNotifications(notificationsEnabled())};
+    const failed=()=>setError('브라우저 알림을 표시할 수 없습니다.');
+    window.addEventListener('focus',refresh);window.addEventListener('storage',refresh);document.addEventListener('visibilitychange',refresh);window.addEventListener('pocket:notification-error',failed);
+    return()=>{window.removeEventListener('focus',refresh);window.removeEventListener('storage',refresh);document.removeEventListener('visibilitychange',refresh);window.removeEventListener('pocket:notification-error',failed)};
+  },[]);
   const timer = useCountdown('pocket-timer', 300000, () => finish('타이머가 종료되었습니다.'));
   const pomo = useCountdown('pocket-pomodoro', 1500000, () => finish(`뽀모도로 ${phaseNames[info.phase]} 시간이 끝났습니다. 다음 단계를 시작해 주세요.`));
   const Heading=showHeading?'h1':'h2';
@@ -356,6 +373,6 @@ export default function ClockTimer({showHeading=true,mode='clock'}:{showHeading?
               if (e.target.checked) void prepare();
             }} />{tr("종료 알림 소리")}</label><button onClick={async () => {
             if (await prepare()) beep();
-          }}><Volume2 size={15} />{tr("소리 테스트")}</button><button disabled={permission==='unsupported'||permission==='denied'} onClick={()=>notifications?setNotifications(false):void enableNotifications()}><Bell size={15}/>{tr(notifications?'브라우저 알림 끄기':'브라우저 알림 켜기')}</button><span role="status">{tr(permission==='denied'?'알림이 차단되어 있습니다. 브라우저 사이트 설정에서 허용해 주세요.':permission==='unsupported'?'이 브라우저는 알림을 지원하지 않습니다.':notifications?'브라우저 알림 사용 중':'')}</span></div></div>)}
+          }}><Volume2 size={15} />{tr("소리 테스트")}</button><button disabled={permission==='unsupported'||permission==='denied'} onClick={()=>notifications?toggleNotifications(false):void enableNotifications()}><Bell size={15}/>{tr(notifications?'브라우저 알림 끄기':'브라우저 알림 켜기')}</button><button disabled={!notifications||permission!=='granted'} onClick={()=>{setError('');void notify('브라우저 알림 테스트입니다.',true)}}>{tr('알림 테스트')}</button><span role="status">{tr(permission==='denied'?'알림이 차단되어 있습니다. 브라우저 사이트 설정에서 허용해 주세요.':permission==='unsupported'?'이 브라우저는 알림을 지원하지 않습니다.':notifications?notificationStatus||'브라우저 알림 사용 중':'')}</span></div></div>)}
  {tr(alarm && <div className="timer-alert" role="status"><Bell size={18} /><span>{tr(alarm)}</span><button onClick={() => setAlarm('')}>{tr("알림 끄기")}</button></div>)}{tr(error && <p className="pdf-message" role="alert">{tr(error)}</p>)}</section><p className="text-tool-note">{tr("시각 출처: ")}<a href={source==='timeapi'?'https://timeapi.io/':source==='naver'?'https://api.searchad.naver.com/':serverURL.startsWith('https://')?serverURL:undefined} target="_blank" rel="noreferrer">{source==='timeapi'?'TimeAPI.io':source==='naver'?'Naver':serverURL}</a>{tr(". 국가 표준시 인증 서비스는 아니며, 통신 지연을 보정한 참고 시각입니다. 뽀모도로는 단계 종료 후 ‘다음 단계’를 누르면 이어집니다. PIP 미지원 브라우저는 페이지 안에 미니 창을 표시합니다. 타이머·뽀모도로는 같은 탭에서 새로고침해도 이어지지만, 탭 종료·기기 절전 중에는 알림이 울리지 않을 수 있습니다.")}</p>{tr(mini && createPortal(mini, pip?.document.body || document.body))}</>;
 }

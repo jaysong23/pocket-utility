@@ -75,7 +75,7 @@ test('language and category navigation preserve input; plain-text copy uses actu
   assert.equal(document.querySelector('h1').textContent,'Timer');
   const button=text=>[...document.querySelectorAll('button')].find(b=>b.textContent===text);
   await act(async()=>button('Enable browser notifications').click());
-  assert.ok(button('Turn off browser notifications'));
+  assert.ok(button('Turn off browser notifications'));assert.equal(localStorage.getItem('pocket-browser-notifications'),'on');assert.equal(notices.length,1);await act(async()=>button('Test notification').click());assert.equal(notices.length,2);notices.length=0;
   await act(async()=>document.querySelector('.timer-sound input').click());
   await act(async()=>document.querySelector('.timer-presets button').click());
   await act(async()=>document.querySelector('.timer-primary').click());
