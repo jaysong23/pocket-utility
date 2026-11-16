@@ -37,5 +37,22 @@ test('language and category navigation preserve input; plain-text copy uses actu
   assert.equal(document.querySelector('h1').textContent,'Image converter');
   await act(async()=>{const select=document.querySelector('.language-switch select');select.value='ja';select.dispatchEvent(new Event('change',{bubbles:true}))});
   assert.equal(location.pathname,'/pocket-utility/ja/webp/');assert.equal(document.documentElement.lang,'ja');
+  await act(async()=>document.querySelector('.breadcrumbs .favorite-button').click());
+  assert.deepEqual(JSON.parse(localStorage.getItem('pocket-favorites')),['webp']);
+  await act(async()=>document.querySelector('.nav-search').click());
+  assert.ok(document.querySelector('#tool-finder'));
+  assert.ok(document.querySelector('.recent-strip a[href$="webp/"]'));
+  await act(async()=>document.querySelector('.saved-filter').click());
+  assert.equal(document.querySelectorAll('.tool-tile').length,1);
+  await act(async()=>document.querySelector('.tool-tile .favorite-button').click());
+  assert.equal(document.querySelectorAll('.tool-tile').length,0);
+  assert.ok(document.querySelector('.no-results button'));
+  await act(async()=>document.querySelector('.no-results button').click());
+  assert.equal(document.querySelectorAll('.tool-tile').length,11);
+  await act(async()=>document.querySelector('.recent-strip>button').click());
+  assert.equal(document.querySelector('.recent-strip'),null);
+  await act(async()=>window.dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'k',ctrlKey:true,bubbles:true})));
+  await new Promise(resolve=>setTimeout(resolve,10));
+  assert.equal(document.activeElement.id,'tool-finder');
  }finally{await act(async()=>root.unmount());globalThis.fetch=oldFetch;if(oldNavigator)Object.defineProperty(globalThis,'navigator',oldNavigator);else delete globalThis.navigator;delete globalThis.IS_REACT_ACT_ENVIRONMENT;for(const key of Object.keys(previous)){if(previous[key]===undefined)delete globalThis[key];else globalThis[key]=previous[key]}dom.window.close()}
 });

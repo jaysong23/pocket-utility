@@ -485,7 +485,7 @@
   ],
   "도구 검색": [
     "Search tools",
-    "ツール検索"
+    "ツールを検索"
   ],
   "검색한 도구가 없어요.": [
     "No tools found.",
@@ -2870,5 +2870,85 @@
   "HEIC·WebP·JPG·PNG 이미지를 원하는 형식으로 변환하세요.": [
     "Convert HEIC, WebP, JPG and PNG images to your preferred format.",
     "HEIC・WebP・JPG・PNG画像をお好みの形式に変換できます。"
+  ],
+  "즐겨찾기 해제": [
+    "Remove favorite",
+    "お気に入りを解除"
+  ],
+  "즐겨찾기 추가": [
+    "Add favorite",
+    "お気に入りに追加"
+  ],
+  "저장됨": [
+    "Saved",
+    "保存済み"
+  ],
+  "즐겨찾기": [
+    "Favorites",
+    "お気に入り"
+  ],
+  "찾고, 바로 쓰고, 끝. 자주 쓰는 도구를 한곳에.": [
+    "Find it. Use it. Done. Your everyday tools in one place.",
+    "見つけて、使って、完了。いつものツールをひとつに。"
+  ],
+  "최근 사용한 도구": [
+    "Recently used tools",
+    "最近使ったツール"
+  ],
+  "최근 사용": [
+    "Recent",
+    "最近使用"
+  ],
+  "기록 지우기": [
+    "Clear history",
+    "履歴を消去"
+  ],
+  "검색 결과": [
+    "Results",
+    "検索結果"
+  ],
+  "도구 열기": [
+    "Open tool",
+    "ツールを開く"
+  ],
+  "저장한 도구가 없어요.": [
+    "No saved tools found.",
+    "保存したツールが見つかりません。"
+  ],
+  "별표를 눌러 자주 쓰는 도구를 모아보세요.": [
+    "Use the star to save your favorite tools.",
+    "星を押してよく使うツールを保存しましょう。"
+  ],
+  "검색어를 줄이거나 다른 카테고리를 선택해 보세요.": [
+    "Try a shorter search or a different category.",
+    "検索語を短くするか、別のカテゴリを選んでください。"
+  ],
+  "사용 전에 궁금한 점": [
+    "Before you start",
+    "ご利用前のよくある質問"
+  ],
+  "사진이나 파일이 서버에 저장되나요?": [
+    "Are my photos or files stored on a server?",
+    "写真やファイルはサーバーに保存されますか？"
+  ],
+  "이미지·PDF·마크다운 변환은 브라우저에서 처리합니다. 변환할 파일은 서버에 업로드하지 않습니다.": [
+    "Image, PDF and Markdown conversions run in your browser. Files are not uploaded to a server for conversion.",
+    "画像・PDF・Markdownの変換はブラウザで処理します。変換するファイルはサーバーにアップロードしません。"
+  ],
+  "인터넷 연결이 필요한가요?": [
+    "Do I need an internet connection?",
+    "インターネット接続は必要ですか？"
+  ],
+  "사이트와 변환기 로딩, 이미지 링크 불러오기, 환율·서버 시각 조회에는 인터넷 연결이 필요합니다.": [
+    "An internet connection is needed to load the site and decoders, fetch image links, and retrieve exchange rates and server time.",
+    "サイトや変換機能の読み込み、画像リンクの取得、為替レート・サーバー時刻の取得にはインターネット接続が必要です。"
+  ],
+  "즐겨찾기와 최근 기록은 어디에 저장되나요?": [
+    "Where are favorites and recent tools saved?",
+    "お気に入りと履歴はどこに保存されますか？"
+  ],
+  "이 브라우저에 도구 목록만 저장합니다. 입력 내용이나 파일은 기록하지 않으며, 다른 기기와 동기화하지 않습니다.": [
+    "Only the tool list is saved in this browser. Input content and files are not recorded, and the list does not sync across devices.",
+    "このブラウザにツールの一覧のみ保存します。入力内容やファイルは記録せず、他の端末とは同期しません。"
   ]
 }
