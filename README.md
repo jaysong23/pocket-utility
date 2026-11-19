@@ -14,7 +14,7 @@
 - **특수문자**: 분류·검색, 클릭해서 모아 쓰기, 명시적 복사 버튼, Windows/Mac 단축키 안내
 - **인스타 폰트**: 12가지 유니코드 영문 스타일, 한글·이모지 유지
 
-- **WebP 변환**: WebP → JPG/PNG, 여러 파일 순차 변환, 이미지 URL 불러오기
+- **WebP·AVIF 변환**: AVIF·WebP·JPG·PNG 입력 및 JPG/PNG/WebP/AVIF 출력, 여러 파일 순차 변환, 이미지 URL 불러오기
 - **HEIC 변환**: HEIC/HEIF → JPG/PNG, 브라우저 내부 처리
 - **Path Converter**: Windows UNC ↔ Mac SMB/AFP 경로 자동 변환, 결과 복사
 - **위크넘버**: 한국 시간 기준 오늘의 ISO 주차, 한국어 날짜·기념일 검색, 월~일 기간, 연간 주차 달력
@@ -32,7 +32,7 @@ HEIC 최초 사용 시 jsDelivr에서 heic-to 1.6.7을 로드합니다. EXIF와 
 
 ## 개발 및 배포
 
-Node.js 22 이상: `npm install`, `npm test`, `npm run build`.
+지원 Node.js 22.22.2+ 또는 24.15.0+: `npm install`, `npm test`, `npm run build`.
 GitHub `main` 업데이트 시 자동으로 테스트 → 빌드 → Pages 배포를 실행합니다.
 
 - `src/App.tsx`: 도구 모음, 한국어 위크넘버, 달력
@@ -56,7 +56,7 @@ GitHub `main` 업데이트 시 자동으로 테스트 → 빌드 → Pages 배�
 - src/translations.json contains UI translations; user input and file contents are never translated.
 - src/week-input.mjs maps explicitly supported English and Japanese date aliases to the Korea-based calendar.
 - src/seo.mjs generates page titles, descriptions, canonical URLs, Open Graph and structured data.
-- Builds produce 36 static localized pages (home + 11 tools), hreflang links, sitemap.xml and robots.txt.
+- Builds produce 63 canonical localized pages (home + 17 tools + 3 service pages), hreflang links, sitemap.xml and robots.txt.
 - public/og contains 1200x630 PNG share images for each page and locale.
 - /markdown/ exports styled HTML, body HTML or plain text (.txt). /md-to-html/ remains a legacy alias.
 - All visitor file conversion runs in the browser. Static site generation never processes visitor files.
@@ -83,3 +83,5 @@ Service pages: `/about/`, `/privacy/`, `/contact/` plus English/Japanese routes,
 The footer uses our own visitor counter, independent of GA4 and Cloudflare Analytics. One visit per browser per Korea-time day; the total sums daily visits. A SQLite Durable Object serializes deduplication and increments. Browser storage avoids repeat writes and edge caching reduces aggregate reads. See [counter details](docs/VISITOR-COUNTER.md). No Google service-account setup is needed. Existing GTM collection remains unchanged.
 
 AdSense account verification meta tag `ca-pub-1071029697771585` is included in the shared HTML head. This verifies account association; it does not enable ad placement or imply approval.
+
+최신 개발·운영 인수인계는 [docs/HANDOVER.md](docs/HANDOVER.md)를 읽으세요. AVIF는 필요 시 로드되는 브라우저 Web Worker/WASM으로 처리하며 사진은 서버로 전송하지 않습니다.

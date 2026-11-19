@@ -164,3 +164,6 @@ html[data-theme=dark] body{background:#292635}
 html[data-theme=dark] .site-footer{background:#252331}html[data-theme=dark] .footer-visitors{background:#2d293a}html[data-theme=dark] .footer-logo,html[data-theme=dark] .footer-visitors dd{color:#d0b9ef}
 @media(max-width:800px){.site-footer>.footer-main{grid-template-columns:minmax(0,1fr) minmax(160px,.7fr);gap:28px}.footer-visitors{grid-column:1/-1}.footer-visitors dl{max-width:400px}}
 @media(max-width:480px){.site-footer{padding:28px 18px 18px;margin-top:24px}.site-footer>.footer-main{grid-template-columns:1fr;gap:24px}.site-footer .footer-links{flex-direction:row;flex-wrap:wrap;gap:16px}.footer-navigation h2{margin-bottom:12px}.footer-visitors{grid-column:auto}.footer-brand .footer-description{max-width:none}.site-footer>.footer-bottom{margin-top:24px}}
+
+/* Upload instructions stay centered independently of page headings. */
+.shell .converter .dropzone h2{text-align:center;margin-left:auto;margin-right:auto}

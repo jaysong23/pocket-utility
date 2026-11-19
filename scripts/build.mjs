@@ -48,3 +48,8 @@ await writeFile('dist/manifest.webmanifest',JSON.stringify({
  display:'standalone',background_color:'#f7f5fb',theme_color:'#7561cd',
  icons:[192,512].map(size=>({src:base+'icons/pocket-'+size+'.png',sizes:size+'x'+size,type:'image/png',purpose:'any'}))
 },null,2)+'\n');
+
+await mkdir('dist/codecs',{recursive:true});
+await build({entryPoints:['src/avif-worker.mjs'],bundle:true,minify:true,format:'esm',platform:'browser',outfile:'dist/codecs/avif-worker.js'});
+for(const [dir,file] of [['enc','avif_enc.wasm'],['dec','avif_dec.wasm']])await cp('node_modules/@jsquash/avif/codec/'+dir+'/'+file,'dist/codecs/'+file);
+await cp('node_modules/@jsquash/avif/LICENSE','dist/codecs/AVIF-LICENSE.txt');

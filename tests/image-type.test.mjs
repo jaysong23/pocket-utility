@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {detectImageType,imageMime} from '../src/image-type.mjs';
+import {detectImageType,imageMime,isAnimatedAVIF} from '../src/image-type.mjs';
 test('image bytes take precedence over filename and MIME', async()=>{
  const jpeg=new File([Uint8Array.from([255,216,255,224,0,16])],'photo.heic',{type:'image/heic'});
  assert.equal(await detectImageType(jpeg),'jpg');
@@ -14,5 +14,9 @@ test('HEIC brands are read from the file type box', async()=>{
  bytes.set(new TextEncoder().encode('ftypmif1'),4);bytes.set(new TextEncoder().encode('heic'),16);
  assert.equal(await detectImageType(new Blob([bytes])),'heic');
  bytes.set(new TextEncoder().encode('avif'),16);
- assert.equal(await detectImageType(new Blob([bytes])),'');
+ assert.equal(await detectImageType(new Blob([bytes])),'avif');
+ assert.equal(isAnimatedAVIF(bytes),false);
+ bytes.set(new TextEncoder().encode('avis'),16);
+ assert.equal(isAnimatedAVIF(bytes),true);
+ assert.equal(await detectImageType(new Blob([bytes])),'avif');
 });

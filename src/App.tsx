@@ -35,13 +35,13 @@ const tools = [{id:'lorem-ipsum',name:'Lorem ipsum 생성기',english:'LOREM IPS
   tags: ['실시간 미리보기', 'HTML / Plain Text']
 }, {
   id: 'webp',
-  name: 'WebP 변환',
-  english: 'WEBP CONVERTER',
+  name: 'WebP·AVIF 변환',
+  english: 'WEBP / AVIF CONVERTER',
   category: '이미지',
-  text: '웹에서 받은 WebP 이미지를\n익숙한 JPG, PNG로 바꿔보세요.',
+  text: 'WebP·AVIF 이미지를 JPG, PNG로.\nAVIF 저장도 지원합니다.',
   Icon: Image,
   color: 'green',
-  tags: ['WebP → JPG', 'WebP → PNG']
+  tags: ['AVIF ↔ JPG / PNG', 'WebP 변환']
 }, {
   id: 'heic',
   name: 'HEIC 변환',
@@ -251,7 +251,7 @@ export default function App() {
   }, []);
 
   const selected = tools.find(t => t.id === route);
-  return <div className="site"><Navigation route={route} language={language}/><main className="shell" id="main-content">{tr(route === 'home' ? <ToolDirectory tools={tools}/> : infoPages[route] ? <InfoPage key={route} id={route}/> : selected ? <><nav className="breadcrumbs" aria-label={tr("탐색 경로")}><a href={routeHref()}>{tr("모든 도구")}</a><span aria-hidden="true">/</span><span aria-current="page">{tr(selected.name)}</span><FavoriteButton id={selected.id}/></nav>{tr(route === 'url-expander' ? <UrlExpander /> : route === 'character-counter' ? <CharacterCounter /> : route === 'lorem-ipsum' ? <LoremGenerator /> : route === 'url-linter' ? <UrlLinter /> : route === 'markdown' ? <MarkdownConverter /> : route === 'weeknumber' ? <WeekNumber query={query} /> : route === 'path-converter' ? <PathConverter /> : route === 'symbols' ? <Symbols /> : route === 'insta-fonts' ? <InstaFonts /> : route === 'currency' ? <CurrencyConverter /> : route === 'units' ? <UnitConverter /> : route === 'pdf-to-jpg' ? <PdfConverter /> : ['clock','timer','pomodoro'].includes(route) ? null : <><div className="tool-heading"><span className="eyebrow">{tr("IMAGE CONVERTER")}</span><h1>{tr("이미지 변환")}</h1><p>{tr("HEIC·WebP·JPG·PNG 이미지를 원하는 형식으로 변환하세요.")}</p></div><Converter kind={route as 'webp' | 'heic'} key={route} /></>)}</> : <div className="no-results"><h1>{tr("도구를 찾을 수 없어요.")}</h1><a href={routeHref()}>{tr("모든 도구로 돌아가기")}</a></div>)}<div hidden={!['clock','timer','pomodoro'].includes(route)}><ClockTimer mode={['clock','timer','pomodoro'].includes(route)?route:'clock'} showHeading={['clock','timer','pomodoro'].includes(route)}/></div>{tr(guides[route] && <div dangerouslySetInnerHTML={{
+  return <div className="site"><Navigation route={route} language={language}/><main className="shell" id="main-content">{tr(route === 'home' ? <ToolDirectory tools={tools}/> : infoPages[route] ? <InfoPage key={route} id={route}/> : selected ? <><nav className="breadcrumbs" aria-label={tr("탐색 경로")}><a href={routeHref()}>{tr("모든 도구")}</a><span aria-hidden="true">/</span><span aria-current="page">{tr(selected.name)}</span><FavoriteButton id={selected.id}/></nav>{tr(route === 'url-expander' ? <UrlExpander /> : route === 'character-counter' ? <CharacterCounter /> : route === 'lorem-ipsum' ? <LoremGenerator /> : route === 'url-linter' ? <UrlLinter /> : route === 'markdown' ? <MarkdownConverter /> : route === 'weeknumber' ? <WeekNumber query={query} /> : route === 'path-converter' ? <PathConverter /> : route === 'symbols' ? <Symbols /> : route === 'insta-fonts' ? <InstaFonts /> : route === 'currency' ? <CurrencyConverter /> : route === 'units' ? <UnitConverter /> : route === 'pdf-to-jpg' ? <PdfConverter /> : ['clock','timer','pomodoro'].includes(route) ? null : <><div className="tool-heading"><span className="eyebrow">{tr("IMAGE CONVERTER")}</span><h1>{tr("이미지 변환")}</h1><p>{tr("AVIF·HEIC·WebP·JPG·PNG 이미지를 원하는 형식으로 변환하세요.")}</p></div><Converter kind={route as 'webp' | 'heic'} key={route} /></>)}</> : <div className="no-results"><h1>{tr("도구를 찾을 수 없어요.")}</h1><a href={routeHref()}>{tr("모든 도구로 돌아가기")}</a></div>)}<div hidden={!['clock','timer','pomodoro'].includes(route)}><ClockTimer mode={['clock','timer','pomodoro'].includes(route)?route:'clock'} showHeading={['clock','timer','pomodoro'].includes(route)}/></div>{tr(guides[route] && <div dangerouslySetInnerHTML={{
         __html: guideHTML(route,language)
       }} />)}{selected&&<section className="related-tools"><h2>{tr("관련 도구")}</h2><div>{tools.filter(tool=>tool.category===selected.category&&tool.id!==route).map(tool=><a key={tool.id} href={routeHref(tool.id)}>{tr(tool.name)}</a>)}</div></section>}</main><SiteFooter language={language}/></div>;
 }

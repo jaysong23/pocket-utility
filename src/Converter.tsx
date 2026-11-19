@@ -1,7 +1,8 @@
 'use client';
 
 import { t as tr, locale, getLanguage } from "./i18n.mjs";
-import { detectImageType, imageMime } from './image-type.mjs';
+import { detectImageType, imageMime, isAnimatedAVIF } from './image-type.mjs';
+import {runAVIF} from './avif-client.mjs';
 import { useRef, useState, useEffect } from 'react';
 import { ArrowDown, ArrowUpRight, Check, FileImage, ImagePlus, Layers, LockKeyhole, Minus, X } from 'lucide-react';
 type Item = {
@@ -48,7 +49,7 @@ function loadHeic(): Promise<HeicDecoder> {
   });
   return decoderPromise;
 }
-const fileType = (f: File) => ({'image/heic':'heic','image/heif':'heic','image/jpeg':'jpg','image/png':'png','image/webp':'webp'})[f.type] || '';
+const fileType = (f: File) => ({'image/heic':'heic','image/heif':'heic','image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/avif':'avif'})[f.type] || '';
 export default function Converter({
   kind
 }: {
@@ -64,6 +65,7 @@ export default function Converter({
   const [imageUrl, setImageUrl] = useState(''),
     [loadingUrl, setLoadingUrl] = useState(false),
     [urlError, setUrlError] = useState('');
+  const avifController=useRef<AbortController|null>(null);
   const input = useRef<HTMLInputElement>(null);
   const seq = useRef(0), mounted = useRef(true), generation = useRef(0);
   const add = async (files: FileList | File[]) => {
@@ -90,6 +92,7 @@ export default function Converter({
     mounted.current = false;
     generation.current++;
     urlController.current?.abort();
+    avifController.current?.abort();
     latest.current.forEach(i => {
       URL.revokeObjectURL(i.preview);
       if (i.url) URL.revokeObjectURL(i.url);
@@ -120,18 +123,14 @@ export default function Converter({
       if (Number(response.headers.get('content-length')) > 30 * 1024 * 1024) throw new Error('30MB 이하의 이미지를 사용해 주세요.');
       const blob = await response.blob();
       if (blob.size > 30 * 1024 * 1024) throw new Error('30MB 이하의 이미지를 사용해 주세요.');
-      const header = new Uint8Array(await blob.slice(0, 12).arrayBuffer());
-      if (String.fromCharCode(...header.slice(0, 4)) !== 'RIFF' || String.fromCharCode(...header.slice(8, 12)) !== 'WEBP') throw new Error('WebP 이미지 파일의 직접 주소를 입력해 주세요.');
-      let name = 'linked-image.webp';
-      try {
-        name = decodeURIComponent(parsed.pathname.split('/').pop() || name).replace(/[<>:"/\\|?*]/g, '_').slice(-100);
-      } catch {}
-      if (!name.toLowerCase().endsWith('.webp')) name += '.webp';
-      if (!mounted.current) return;
-      const file = new File([blob], name, {
-        type: 'image/webp'
-      });
-      setFrom('webp');
+      const type=await detectImageType(blob);
+      if(!type)throw new Error('지원하는 이미지 파일의 직접 주소를 입력해 주세요.');
+      let name='linked-image.'+type;
+      try{name=decodeURIComponent(parsed.pathname.split('/').pop()||name).replace(/[<>:"/\\|?*]/g,'_').slice(-100);}catch{}
+      if(!/\.(webp|avif|heic|heif|jpe?g|png)$/i.test(name))name+='.'+type;
+      if(!mounted.current)return;
+      const file=new File([blob],name,{type:imageMime(type)});
+      setFrom('auto');
       setItems(old => [...old, {
         id: ++seq.current,
         file,
@@ -196,6 +195,7 @@ export default function Converter({
           const len = new DataView(bytes.buffer).getUint32(p + 4, true);
           p += 8 + len + len % 2;
         }
+        if(fileType(item.file)==='avif'&&isAnimatedAVIF(bytes))throw new Error('움직이는 AVIF는 지원하지 않습니다. 정지 이미지를 사용해 주세요.');
         if (animated) throw new Error('움직이는 WebP는 지원하지 않습니다.');
         let source: Blob = item.file;
         if (fileType(item.file) === 'heic') {
@@ -211,7 +211,12 @@ export default function Converter({
           });
         }
         if (!mounted.current) break;
-        bitmap = await createImageBitmap(source);
+        avifController.current=new AbortController();
+        try{bitmap=await createImageBitmap(source);}catch(error){
+          if(fileType(item.file)!=='avif')throw error;
+          const decoded:any=await runAVIF('decode',{buffer:await source.arrayBuffer()},avifController.current.signal);
+          bitmap=await createImageBitmap(new ImageData(new Uint8ClampedArray(decoded.data),decoded.width,decoded.height));
+        }
         if (!mounted.current) break;
         if (bitmap.width * bitmap.height > 40000000) throw new Error('40메가픽셀 이하 이미지를 사용해 주세요.');
         canvas = document.createElement('canvas');
@@ -224,7 +229,7 @@ export default function Converter({
           ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
         ctx.drawImage(bitmap, 0, 0);
-        const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(new Error('변환에 실패했습니다.')), format === 'jpg' ? 'image/jpeg' : format === 'webp' ? 'image/webp' : 'image/png', quality / 100));
+        const blob = format==='avif'?new Blob([await runAVIF('encode',{pixels:ctx.getImageData(0,0,canvas.width,canvas.height),quality},avifController.current.signal) as ArrayBuffer],{type:'image/avif'}):await new Promise<Blob>((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(new Error('변환에 실패했습니다.')), format === 'jpg' ? 'image/jpeg' : format === 'webp' ? 'image/webp' : 'image/png', quality / 100));
         if (blob.type !== (format === 'jpg' ? 'image/jpeg' : 'image/' + format)) throw new Error('이 브라우저에서 선택한 출력 포맷을 지원하지 않습니다.');
         if (!mounted.current) break;
         const url = URL.createObjectURL(blob);
@@ -233,7 +238,7 @@ export default function Converter({
           ...i,
           url,
           size: blob.size,
-          name: item.file.name.replace(/\.(webp|heic|heif|jpe?g|png)$/i, '') + '.' + format,
+          name: item.file.name.replace(/\.(webp|avif|heic|heif|jpe?g|png)$/i, '') + '.' + format,
           status: '변환 완료'
         } : i));
         canvas.width = 0;
@@ -266,13 +271,13 @@ export default function Converter({
           e.preventDefault();
           setDrag(false);
           if (!busy) add(e.dataTransfer.files);
-        }}><div className="file-art"><div className="back-file" /><div className="front-file"><FileImage size={37} strokeWidth={1.3} /><span>{tr(from === 'auto' ? 'IMAGE' : from.toUpperCase())}</span></div><div className="plus">+</div></div><h2>{tr("여기에 ")}{tr(from === 'auto' ? '이미지' : from.toUpperCase())}{tr(" 파일을 놓아주세요")}</h2><p>{tr("여러 파일을 한 번에 추가할 수 있어요")}</p><button disabled={busy} className="select" onClick={() => input.current?.click()}><ImagePlus size={18} />{tr(" 파일 선택하기")}</button><input ref={input} type="file" accept={from === 'auto' ? '.webp,.heic,.heif,.jpg,.jpeg,.png' : from === 'heic' ? '.heic,.heif' : from === 'jpg' ? '.jpg,.jpeg' : '.' + from} multiple hidden onChange={e => {
+        }}><div className="file-art"><div className="back-file" /><div className="front-file"><FileImage size={37} strokeWidth={1.3} /><span>{tr(from === 'auto' ? 'IMAGE' : from.toUpperCase())}</span></div><div className="plus">+</div></div><h2>{tr(`여기에 ${from === 'auto' ? '이미지' : from.toUpperCase()} 파일을 놓아주세요`)}</h2><p>{tr("여러 파일을 한 번에 추가할 수 있어요")}</p><button disabled={busy} className="select" onClick={() => input.current?.click()}><ImagePlus size={18} />{tr(" 파일 선택하기")}</button><input ref={input} type="file" accept={from === 'auto' ? '.webp,.avif,.heic,.heif,.jpg,.jpeg,.png' : from === 'heic' ? '.heic,.heif' : from === 'jpg' ? '.jpg,.jpeg' : '.' + from} multiple hidden onChange={e => {
             if (e.target.files) add(e.target.files);
             e.target.value = '';
-          }} /><small>{tr("HEIC · WEBP · JPG · PNG / 원본 해상도 유지")}</small></div>{tr(kind === 'webp' && <div className="url-section"><form className="url-form" onSubmit={e => {
+          }} /><small>{tr("AVIF · HEIC · WEBP · JPG · PNG / 원본 해상도 유지")}</small></div>{tr(['webp','heic'].includes(kind) && <div className="url-section"><form className="url-form" onSubmit={e => {
             e.preventDefault();
             loadUrl();
-          }}><input type="url" aria-label={tr("WebP 이미지 주소")} placeholder={tr("https://.../image.webp 링크 붙여넣기")} value={imageUrl} disabled={busy || loadingUrl} onChange={e => setImageUrl(e.target.value)} /><button type="submit" disabled={busy || loadingUrl || !imageUrl.trim()}>{tr(loadingUrl ? '불러오는 중…' : '링크 불러오기')}</button></form><p className="url-help">{tr("공개 WebP 이미지의 직접 주소를 입력하세요. 나무위키 등 외부 접근을 차단한 사이트는 파일을 저장해 추가해 주세요.")}</p>{tr(urlError && <p className="error" role="alert">{tr(urlError)}</p>)}</div>)}<div className="queue-title"><span>{tr("내 파일 ")}<b>{tr(items.length.toString().padStart(2, '0'))}</b></span>{tr(items.length > 0 && <button className="text-button" disabled={busy} onClick={clear}>{tr("모두 지우기")}</button>)}</div><div className="file-list" aria-live="polite">{tr(items.length === 0 ? <div className="empty"><Layers size={24} /><p>{tr("추가한 이미지가 여기에 표시됩니다.")}</p></div> : items.map(i => <div className="file-row" key={i.id}>{tr(fileType(i.file) === 'heic' && !i.url ? <div className="heic-thumb">HEIC</div> : <img src={fileType(i.file) === 'heic' ? i.url : i.preview} alt={tr("")} />)}<div className="file-info"><strong>{i.file.name}</strong><span>{tr(size(i.file.size))} {tr(i.size && <>→ {tr(size(i.size))}</>)}<em className={i.url ? 'complete' : ''}>{tr(i.status)}</em></span>{tr(i.error && <small className="error">{tr(i.error)}</small>)}</div>{tr(i.url && <button className="icon-button" title={tr(`${i.name} 다운로드`)} aria-label={tr(`${i.name} 다운로드`)} onClick={() => download(i)}><ArrowDown size={18} /></button>)}<button className="icon-button" disabled={busy} aria-label={tr(`${i.file.name} 삭제`)} onClick={() => remove(i.id)}><X size={16} /></button></div>))}</div>{tr(notice && <p role="status" className="notice">{tr(notice)}</p>)}</div><aside><div className="settings-title"><span>{tr("변환 설정")}</span><span>01 — 02</span></div><div className="format-direction"><label>FROM <span>{tr("원본 포맷")}</span><select aria-label={tr("FROM 원본 포맷")} value={from} disabled={busy} onChange={e => setFrom(e.target.value)}><option value="auto">{tr("자동 감지")}</option><option value="heic">HEIC / HEIF</option><option value="webp">WebP</option><option value="jpg">JPG</option><option value="png">PNG</option></select></label><span className="direction-arrow">→</span><label>TO <span>{tr("저장 포맷")}</span><select aria-label={tr("TO 저장 포맷")} value={format} disabled={busy} onChange={e => {
+          }}><input type="url" aria-label={tr("이미지 주소")} placeholder={tr("https://.../image.avif 링크 붙여넣기")} value={imageUrl} disabled={busy || loadingUrl} onChange={e => setImageUrl(e.target.value)} /><button type="submit" disabled={busy || loadingUrl || !imageUrl.trim()}>{tr(loadingUrl ? '불러오는 중…' : '링크 불러오기')}</button></form><p className="url-help">{tr("공개 이미지의 직접 주소를 입력하세요. 나무위키 등 외부 접근을 차단한 사이트는 파일을 저장해 추가해 주세요.")}</p>{tr(urlError && <p className="error" role="alert">{tr(urlError)}</p>)}</div>)}<div className="queue-title"><span>{tr("내 파일 ")}<b>{tr(items.length.toString().padStart(2, '0'))}</b></span>{tr(items.length > 0 && <button className="text-button" disabled={busy} onClick={clear}>{tr("모두 지우기")}</button>)}</div><div className="file-list" aria-live="polite">{tr(items.length === 0 ? <div className="empty"><Layers size={24} /><p>{tr("추가한 이미지가 여기에 표시됩니다.")}</p></div> : items.map(i => <div className="file-row" key={i.id}>{tr(fileType(i.file) === 'heic' && !i.url ? <div className="heic-thumb">HEIC</div> : <img src={fileType(i.file) === 'heic' ? i.url : i.preview} alt={tr("")} />)}<div className="file-info"><strong>{i.file.name}</strong><span>{tr(size(i.file.size))} {tr(i.size && <>→ {tr(size(i.size))}</>)}<em className={i.url ? 'complete' : ''}>{tr(i.status)}</em></span>{tr(i.error && <small className="error">{tr(i.error)}</small>)}</div>{tr(i.url && <button className="icon-button" title={tr(`${i.name} 다운로드`)} aria-label={tr(`${i.name} 다운로드`)} onClick={() => download(i)}><ArrowDown size={18} /></button>)}<button className="icon-button" disabled={busy} aria-label={tr(`${i.file.name} 삭제`)} onClick={() => remove(i.id)}><X size={16} /></button></div>))}</div>{tr(notice && <p role="status" className="notice">{tr(notice)}</p>)}</div><aside><div className="settings-title"><span>{tr("변환 설정")}</span><span>01 — 02</span></div><div className="format-direction"><label>FROM <span>{tr("원본 포맷")}</span><select aria-label={tr("FROM 원본 포맷")} value={from} disabled={busy} onChange={e => setFrom(e.target.value)}><option value="auto">{tr("자동 감지")}</option><option value="heic">HEIC / HEIF</option><option value="webp">WebP</option><option value="avif">AVIF</option><option value="jpg">JPG</option><option value="png">PNG</option></select></label><span className="direction-arrow">→</span><label>TO <span>{tr("저장 포맷")}</span><select aria-label={tr("TO 저장 포맷")} value={format} disabled={busy} onChange={e => {
               setFormat(e.target.value);
               setItems(old => old.map(i => {
                 if (i.url) URL.revokeObjectURL(i.url);
@@ -284,11 +289,11 @@ export default function Converter({
                   error: undefined
                 };
               }));
-            }}><option value="jpg">JPG</option><option value="png">PNG</option><option value="webp">WebP</option></select></label></div><p className="format-hint">{tr("여러 포맷이 섞여 있다면 자동 감지를 선택하세요.")}</p><label className="label second">02 <b>{tr(format !== 'png' ? '이미지 품질' : '배경 처리')}</b>{tr(format !== 'png' && <strong>{tr(quality)}%</strong>)}</label>{tr(format !== 'png' ? <><input aria-label={tr("이미지 품질")} disabled={busy} className="slider" type="range" min="10" max="100" value={quality} onChange={e => { setQuality(+e.target.value); invalidateResults(); }} /><div className="range-label"><span>{tr("작은 용량")}</span><span>{tr("높은 품질")}</span></div><p className="setting-note">{tr(format === 'jpg' ? '투명한 영역은 흰색으로 저장됩니다.' : '투명 배경을 유지하며 용량을 줄여요.')}</p></> : <div className="png-note"><Check size={17} />{tr(" 투명 배경을 그대로 유지해요")}<p>{tr("PNG는 품질 손실 없이 저장됩니다.")}</p></div>)}<div className="actions"><button disabled={!items.length || busy || loadingUrl} className="convert" onClick={convert}>{tr(busy ? '이미지를 변환하고 있어요…' : `${items.length ? items.length + '개 이미지 ' : ''}변환하기`)}<ArrowUpRight size={20} /></button><button className="download" disabled={!done.length || busy} onClick={async () => {
+            }}><option value="jpg">JPG</option><option value="png">PNG</option><option value="webp">WebP</option><option value="avif">AVIF</option></select></label></div><p className="format-hint">{tr("여러 포맷이 섞여 있다면 자동 감지를 선택하세요.")}</p><label className="label second">02 <b>{tr(format !== 'png' ? '이미지 품질' : '배경 처리')}</b>{tr(format !== 'png' && <strong>{tr(quality)}%</strong>)}</label>{tr(format !== 'png' ? <><input aria-label={tr("이미지 품질")} disabled={busy} className="slider" type="range" min="10" max="100" value={quality} onChange={e => { setQuality(+e.target.value); invalidateResults(); }} /><div className="range-label"><span>{tr("작은 용량")}</span><span>{tr("높은 품질")}</span></div><p className="setting-note">{tr(format === 'jpg' ? '투명한 영역은 흰색으로 저장됩니다.' : '투명 배경을 유지하며 용량을 줄여요.')}</p></> : <div className="png-note"><Check size={17} />{tr(" 투명 배경을 그대로 유지해요")}<p>{tr("PNG는 품질 손실 없이 저장됩니다.")}</p></div>)}<div className="actions"><button disabled={!items.length || busy || loadingUrl} className="convert" onClick={convert}>{tr(busy ? '이미지를 변환하고 있어요…' : `${items.length ? items.length + '개 이미지 ' : ''}변환하기`)}<ArrowUpRight size={20} /></button><button className="download" disabled={!done.length || busy} onClick={async () => {
             for (const i of done) {
               download(i);
               await new Promise(r => setTimeout(r, 350));
             }
             setNotice('여러 파일 저장이 차단되면 브라우저에서 자동 다운로드를 허용하거나 개별 다운로드 버튼을 사용해 주세요.');
-          }}><ArrowDown size={17} />{tr(" 모두 다운로드 ")}{tr(done.length > 0 && `(${done.length})`)}</button></div><p className="heic-note">{tr("HEIC 첫 변환 시 변환기를 다운로드합니다. 사진은 전송하지 않으며, 인터넷 연결이 필요합니다. 사진 메타데이터와 Live Photo의 동영상은 유지되지 않습니다.")}</p><div className="privacy"><LockKeyhole size={18} /><p>{tr("당신의 이미지는 당신에게만.")}<br /><span>{tr("모든 변환은 기기 안에서 처리되며")}<br />{tr("서버에 이미지를 저장하지 않습니다.")}</span></p></div></aside></section></div>;
+          }}><ArrowDown size={17} />{tr(" 모두 다운로드 ")}{tr(done.length > 0 && `(${done.length})`)}</button></div><p className="heic-note">{tr("AVIF 변환기는 필요할 때 기기에 다운로드됩니다. 정지 이미지만 지원하며 메타데이터와 HDR은 유지되지 않습니다.")}</p><p className="heic-note">{tr("HEIC 첫 변환 시 변환기를 다운로드합니다. 사진은 전송하지 않으며, 인터넷 연결이 필요합니다. 사진 메타데이터와 Live Photo의 동영상은 유지되지 않습니다.")}</p><div className="privacy"><LockKeyhole size={18} /><p>{tr("당신의 이미지는 당신에게만.")}<br /><span>{tr("모든 변환은 기기 안에서 처리되며")}<br />{tr("서버에 이미지를 저장하지 않습니다.")}</span></p></div></aside></section></div>;
 }

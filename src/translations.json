@@ -3826,5 +3826,61 @@
   "하루 한 번, 브라우저 기준 · 누적은 일별 합계": [
     "Once per browser per day · Total sums daily visits",
     "1ブラウザーにつき1日1回 · 累計は日別の合計"
+  ],
+  "WebP·AVIF 변환": [
+    "WebP & AVIF converter",
+    "WebP・AVIF変換"
+  ],
+  "WebP·AVIF 이미지 변환": [
+    "WebP & AVIF image converter",
+    "WebP・AVIF画像変換"
+  ],
+  "WebP·AVIF 이미지를 JPG, PNG로.\nAVIF 저장도 지원합니다.": [
+    "Convert WebP and AVIF to JPG or PNG.\nSave as AVIF, too.",
+    "WebP・AVIFをJPG・PNGに変換。\nAVIF保存にも対応。"
+  ],
+  "AVIF·HEIC·WebP·JPG·PNG 이미지를 원하는 형식으로 변환하세요.": [
+    "Convert AVIF, HEIC, WebP, JPG and PNG to your preferred format.",
+    "AVIF・HEIC・WebP・JPG・PNGをお好みの形式に変換。"
+  ],
+  "WebP·AVIF를 JPG·PNG로 변환하거나 이미지를 AVIF로 저장하세요. 파일 선택과 이미지 URL 입력을 지원합니다.": [
+    "Convert WebP and AVIF to JPG or PNG, or save images as AVIF. Select files or enter a direct image URL.",
+    "WebP・AVIFをJPG・PNGに変換、またはAVIFとして保存。ファイル選択と画像URL入力に対応。"
+  ],
+  "이미지 주소": [
+    "Image URL",
+    "画像URL"
+  ],
+  "https://.../image.avif 링크 붙여넣기": [
+    "Paste https://.../image.avif",
+    "https://.../image.avif を貼り付け"
+  ],
+  "공개 이미지의 직접 주소를 입력하세요. 나무위키 등 외부 접근을 차단한 사이트는 파일을 저장해 추가해 주세요.": [
+    "Enter a direct public image URL. If the source blocks access, save the file and add it instead.",
+    "公開画像の直接URLを入力してください。外部アクセスが制限されている場合はファイルを保存して追加してください。"
+  ],
+  "지원하는 이미지 파일의 직접 주소를 입력해 주세요.": [
+    "Enter a direct URL to a supported image file.",
+    "対応する画像ファイルの直接URLを入力してください。"
+  ],
+  "움직이는 AVIF는 지원하지 않습니다. 정지 이미지를 사용해 주세요.": [
+    "Animated AVIF is not supported. Use a still image.",
+    "アニメーションAVIFには対応していません。静止画を使用してください。"
+  ],
+  "AVIF 변환에 실패했습니다. 파일과 인터넷 연결을 확인하거나 더 작은 이미지를 사용해 주세요.": [
+    "AVIF conversion failed. Check the file and internet connection, or try a smaller image.",
+    "AVIF変換に失敗しました。ファイルと接続を確認するか、小さい画像をお試しください。"
+  ],
+  "AVIF 변환기는 필요할 때 기기에 다운로드됩니다. 정지 이미지만 지원하며 메타데이터와 HDR은 유지되지 않습니다.": [
+    "The AVIF codec downloads when needed and runs on your device. Still images only; metadata and HDR are not preserved.",
+    "AVIF変換器は必要時にダウンロードされ端末内で動作します。静止画のみ対応し、メタデータとHDRは保持されません。"
+  ],
+  "AVIF · HEIC · WEBP · JPG · PNG / 원본 해상도 유지": [
+    "AVIF · HEIC · WEBP · JPG · PNG / Original resolution",
+    "AVIF · HEIC · WEBP · JPG · PNG / 元の解像度を維持"
+  ],
+  "여기에 {0} 파일을 놓아주세요": [
+    "Drop {0} files here",
+    "ここに{0}ファイルをドロップ"
   ]
 }
