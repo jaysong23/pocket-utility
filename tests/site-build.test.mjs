@@ -28,6 +28,15 @@ test('63 localized static pages have unique metadata, semantic content and share
   }
   assert.equal(canonicals.size,63);const sitemap=readFileSync('dist/sitemap.xml','utf8');assert.equal((sitemap.match(/<loc>/g)||[]).length,63);assert.ok(!sitemap.includes('#/'));assert.ok(!sitemap.includes('md-to-html'));
   assert.ok(readFileSync('dist/md-to-html/index.html','utf8').includes('href="'+site+'markdown/"'));
+  for(const [lang,title] of [['ko','위크넘버 계산기'],['en','Week number calculator'],['ja','週番号計算ツール']]){
+   const wdom=new JSDOM(readFileSync('dist/'+pagePath('weeknumber',lang)+'index.html','utf8'));const wd=wdom.window.document;
+   assert.equal(wd.title,title+' | MY POCKET UTILITY');assert.equal(wd.querySelector('h1').textContent,title);
+   assert.equal(wd.querySelector('meta[property="og:title"]').content,title+' | MY POCKET UTILITY');
+   assert.equal(wd.querySelector('meta[name="twitter:title"]').content,title+' | MY POCKET UTILITY');
+   const graph=JSON.parse(wd.querySelector('#page-schema').textContent)['@graph'];
+   assert.equal(graph.find(n=>n['@type']==='BreadcrumbList').itemListElement[1].name,title);
+   wdom.window.close();
+  }
  }
 });
 

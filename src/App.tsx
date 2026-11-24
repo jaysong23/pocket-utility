@@ -53,8 +53,8 @@ const tools = [{id:'lorem-ipsum',name:'Lorem ipsum 생성기',english:'LOREM IPS
   tags: ['HEIC → JPG', 'HEIC → PNG']
 }, {
   id: 'weeknumber',
-  name: '위크넘버',
-  english: 'WEEK NUMBER',
+  name: '위크넘버 계산기',
+  english: 'WEEK NUMBER CALCULATOR',
   category: '날짜·시간',
   text: '오늘은 몇 주차일까요?\n날짜와 기념일로 주차를 찾아보세요.',
   Icon: CalendarDays,
@@ -203,7 +203,7 @@ function WeekNumber({
     navigate(routeHref('weeknumber', q));
   };
   const same = result && result.year === current.year && result.week === current.week;
-  return <><div className="tool-heading"><span className="eyebrow">DATE & TIME / 03</span><h1>{tr("위크넘버")}</h1><p>{tr("“내년 추석”도, “12월 23일”도. 한국어로 편하게 검색하세요.")}</p></div><section className="week-search"><form onSubmit={e => {
+  return <><div className="tool-heading"><span className="eyebrow">DATE & TIME / 03</span><h1>{tr("위크넘버 계산기")}</h1><p>{tr("“내년 추석”도, “12월 23일”도. 한국어로 편하게 검색하세요.")}</p></div><section className="week-search"><form onSubmit={e => {
         e.preventDefault();
         run(input);
       }}><Search size={21} /><input aria-label={tr("날짜 또는 주차 검색")} value={input} onChange={e => setInput(e.target.value)} placeholder={tr("52주차, 12월 23일, 크리스마스, 내년 추석")} /><button type="submit">{tr("조회하기 ")}<ArrowRight size={17} /></button></form><div className="examples"><span>{tr("이렇게 검색해 보세요")}</span>{tr(['오늘', '52주차', '12월 23일', '크리스마스', '내년 추석'].map(x => <button key={x} onClick={() => run(tr(x))}>{tr(x)}</button>))}</div></section>{tr(error ? <div className="query-error" role="alert"><b>{tr("검색어를 다시 확인해 주세요.")}</b><p>{tr(error)}</p><button onClick={() => run('')}>{tr("오늘의 주차 보기")}</button></div> : <><section className="week-result" aria-live="polite"><div className="week-main"><div className="week-label"><span className="live-dot" />{tr(!query ? '오늘의 주차' : result.label)}{tr(same && query && <small>{tr("이번 주")}</small>)}</div><div className="big-week"><span>{tr(String(result.week).padStart(2, '0'))}</span><div><b>{tr("주차")}</b><small>{tr(`${result.year}년 ${result.week}주차`)}</small></div></div><p className="result-date">{tr(result.date ? dateLabel(result.date) : `${result.year}년의 ${result.week}번째 주`)}</p><span className="basis">{tr(result.basis)}</span></div><div className="week-detail"><span className="eyebrow">{tr("한 주의 기간")}</span><div className="range-date"><span>{tr("월요일")}</span><strong>{tr(dateLabel(result.start))}</strong></div><div className="range-line" /><div className="range-date"><span>{tr("일요일")}</span><strong>{tr(dateLabel(result.end))}</strong></div><div className="week-controls"><button aria-label={tr("이전 주")} onClick={() => run(dateKey(addDays(result.start, -7)))} disabled={result.start.getUTCFullYear() < 1900}><ChevronLeft size={16} />{tr(" 이전 주")}</button><button onClick={() => run('')}>{tr("오늘")}</button><button aria-label={tr("다음 주")} onClick={() => run(dateKey(addDays(result.start, 7)))} disabled={result.end.getUTCFullYear() > 2100}>{tr("다음 주 ")}<ChevronRight size={16} /></button></div></div></section>{tr(result.festival && <p className="festival-note"><CalendarDays size={17} /> {tr(result.label)}{tr(" 당일은 ")}{tr(dateLabel(result.date))}{tr("입니다. 전날·당일·다음날: ")}{tr(dateLabel(addDays(result.date, -1)))} ~ {tr(dateLabel(addDays(result.date, 1)))}. <span>{tr("대체·임시공휴일은 포함하지 않습니다.")}</span></p>)}<div className="result-bottom"><span>{tr("한국 시간 (KST) · ISO 8601 · 월요일~일요일")}</span><button onClick={async () => {

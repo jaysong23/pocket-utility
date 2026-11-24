@@ -3882,5 +3882,13 @@
   "여기에 {0} 파일을 놓아주세요": [
     "Drop {0} files here",
     "ここに{0}ファイルをドロップ"
+  ],
+  "위크넘버 계산기": [
+    "Week number calculator",
+    "週番号計算ツール"
+  ],
+  "오늘의 위크넘버와 ISO 주차, 한 주의 기간을 바로 계산하세요. 27년 1주차, 26-07-30, 내년 추석 등 한국어 날짜를 검색합니다.": [
+    "Calculate today's ISO week number and date range. Search dates or Korean holidays. Uses Korea time and the Korean holiday calendar.",
+    "今日のISO週番号と期間をすぐ計算。日付や韓国の記念日で検索できます。韓国時間・韓国の祝日カレンダーを使用します。"
   ]
 }
