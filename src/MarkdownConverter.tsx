@@ -1,16 +1,17 @@
 import { t as tr, locale, getLanguage } from "./i18n.mjs";
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Copy, Download, Upload, FileCode2 } from 'lucide-react';
-import { createMarkdownConverter, htmlDocument, plainTextFromHTML, MAX_MARKDOWN } from './markdown.mjs';
+import { createMarkdownConverter, htmlDocument, plainTextFromHTML, defaultDocumentTitle, extractDocumentTitle, sanitizeFilename, MAX_MARKDOWN } from './markdown.mjs';
 const fence = String.fromCharCode(96).repeat(3);
 const sampleText = () => tr('# 마크다운을 HTML로\n\n문서를 **간편하게** 작성하고 웹페이지로 저장하세요.\n\n## 할 일\n\n- [x] 마크다운 입력하기\n- [ ] HTML로 저장하기\n\n## 표\n\n| 도구 | 기능 |\n| --- | --- |\n| MY POCKET UTILITY | 일상 도구 모음 |\n| MD → HTML | 문서 변환 |\n\n> 표, 체크리스트, 인용문, 코드블록을 지원합니다.\n\n') + fence + 'javascript\nconst message = "Hello, MY POCKET UTILITY!";\nconsole.log(message);\n' + fence + tr('\n\n[링크 예시](https://example.com)\n');
 export default function MarkdownConverter() {
+  const lang = getLanguage();
   const [input, setInput] = useState(sampleText),
     [settled, setSettled] = useState(sampleText),
     [tab, setTab] = useState('preview'),
     [mode, setMode] = useState('document'),
-    [title, setTitle] = useState(()=>tr('Markdown 문서')),
-    [filename, setFilename] = useState('document'),
+    [title, setTitle] = useState(''),
+    [filename, setFilename] = useState(''),
     [images, setImages] = useState(false),
     [status, setStatus] = useState(''),
     [fileError, setFileError] = useState('');
@@ -41,9 +42,14 @@ export default function MarkdownConverter() {
     error
   } = result;
   const plain=useMemo(()=>plainTextFromHTML(body,window),[body]);
+  const headingTitle = useMemo(() => extractDocumentTitle(body, window), [body]);
+  const autoTitle = headingTitle || defaultDocumentTitle(lang);
+  const effectiveTitle = title.trim() || autoTitle;
+  const autoFilename = sanitizeFilename(mode === 'plain' ? autoTitle : effectiveTitle, 'document');
+  const effectiveFilename = sanitizeFilename(filename, autoFilename);
   const pending = input !== settled,
-    output = mode === 'plain' ? plain : mode === 'document' ? htmlDocument(body, title,true,getLanguage()) : body;
-  const preview = useMemo(() => htmlDocument(body, title, images,getLanguage()), [body, title, images,getLanguage()]);
+    output = mode === 'plain' ? plain : mode === 'document' ? htmlDocument(body, effectiveTitle, true, lang) : body;
+  const preview = useMemo(() => htmlDocument(body, effectiveTitle, images, lang), [body, effectiveTitle, images, lang]);
   const change = (text: string) => {
     fileRead.current++;
     setInput(text);
@@ -71,7 +77,7 @@ export default function MarkdownConverter() {
       }
       setInput(text);
       setFilename(file.name.replace(/\.[^.]+$/, ''));
-      setTitle(file.name.replace(/\.[^.]+$/, ''));
+      setTitle('');
       setStatus('파일을 불러왔어요.');
     } catch {
       if (id === fileRead.current) setFileError('파일을 읽지 못했습니다. UTF-8 텍스트 파일을 확인해 주세요.');
@@ -83,19 +89,22 @@ export default function MarkdownConverter() {
     }));
     const a = document.createElement('a');
     a.href = url;
-    a.download = (filename.replace(/[<>:"/\\|?*\u0000-\u001f]/g, '_').trim() || 'document') + (mode==='plain'?'.txt':'.html');
+    a.download = effectiveFilename + (mode==='plain'?'.txt':'.html');
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 10000);
-    setStatus('HTML 파일을 저장했어요.');
+    setStatus(mode === 'plain' ? 'TXT 파일을 저장했어요.' : 'HTML 파일을 저장했어요.');
   };
   return <><div className="tool-heading"><span className="eyebrow">MARKDOWN CONVERTER</span><h1>{tr("마크다운 변환")}</h1><p>{tr("마크다운을 HTML 또는 일반 텍스트로 변환하세요.")}</p></div>
  <div className="md-options"><label>{tr("출력 형식")}<select value={mode} onChange={e => {
           setMode(e.target.value);
           setStatus('');
-        }}><option value="document">{tr("스타일 포함 완성형 HTML")}</option><option value="body">{tr("본문 HTML만")}</option><option value="plain">Plain Text (.txt)</option></select></label><label>{tr("문서 제목")}<input disabled={mode==='plain'} value={title} maxLength={160} onChange={e => {
+        }}><option value="document">{tr("스타일 포함 완성형 HTML")}</option><option value="body">{tr("본문 HTML만")}</option><option value="plain">Plain Text (.txt)</option></select></label><label>{tr("페이지 제목 (<title>)")}<input disabled={mode!=='document'} value={title} placeholder={autoTitle} maxLength={160} onChange={e => {
           setTitle(e.target.value);
           setStatus('');
-        }} /></label><label>{tr("파일 이름")}<span className="md-filename-field"><input value={filename} maxLength={100} onChange={e => setFilename(e.target.value)} /><span className="md-extension" aria-hidden="true">{mode==='plain'?'.txt':'.html'}</span></span></label></div>
+        }} /></label><label>{tr("파일 이름")}<span className="md-filename-field"><input value={filename} placeholder={autoFilename} maxLength={100} onChange={e => {
+          setFilename(e.target.value);
+          setStatus('');
+        }} /><span className="md-extension" aria-hidden="true">{mode==='plain'?'.txt':'.html'}</span></span></label></div>
  <div className="md-editor"><section className="md-pane"><div className="md-pane-head"><h2><FileCode2 size={17} />Markdown</h2><label className="md-upload"><Upload size={14} />{tr("파일 불러오기")}<input type="file" accept=".md,.markdown,.txt,text/markdown,text/plain" onChange={e => {
               void loadFile(e.target.files?.[0]);
               e.target.value = '';

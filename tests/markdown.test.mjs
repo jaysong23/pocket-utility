@@ -1,7 +1,7 @@
 import test,{after} from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
-import {createMarkdownConverter,htmlDocument,MAX_MARKDOWN} from '../src/markdown.mjs';
+import {createMarkdownConverter,htmlDocument,extractDocumentTitle,defaultDocumentTitle,sanitizeFilename,MAX_MARKDOWN} from '../src/markdown.mjs';
 const dom=new JSDOM(''),convert=createMarkdownConverter(dom.window);
 after(()=>dom.window.close());
 test('Korean headings, tables, checklists and fenced code',()=>{
@@ -34,4 +34,18 @@ test('CJK emphasis and strikethrough work across punctuation and particles witho
  assert.equal(convert('매출~~+26%~~로 및 한글~~(삭제)~~는').trim(),'<p>매출<del>+26%</del>로 및 한글<del>(삭제)</del>는</p>');
  assert.equal(convert('한글**(보고서_(최종)_2026)**는 foo_bar_baz').trim(),'<p>한글<strong>(보고서_(최종)_2026)</strong>는 foo_bar_baz</p>');
  assert.equal(convert('`**+26%**로` \\*\\*+26%\\*\\*로 10% * 20%').trim(),'<p><code>**+26%**로</code> **+26%**로 10% * 20%</p>');
+});
+test('document title uses first top-level H1 or localized default and sanitizes filename',()=>{
+ const fence=String.fromCharCode(96).repeat(3);
+ assert.equal(extractDocumentTitle(convert('# **2026년** [실적 리포트](https://example.com)\n\n# 두 번째 제목'),dom.window),'2026년 실적 리포트');
+ assert.equal(extractDocumentTitle(convert(fence+'python\n# not a heading\n'+fence+'\n\n> # quoted\n\n# 실제 제목'),dom.window),'실제 제목');
+ assert.equal(extractDocumentTitle(convert('## 소제목만 있음\n\n본문'),dom.window),'');
+ assert.equal(defaultDocumentTitle('ko'),'Markdown 문서');
+ assert.equal(defaultDocumentTitle('en'),'Markdown Document');
+ assert.equal(defaultDocumentTitle('ja'),'マークダウン文書');
+ assert.match(htmlDocument('<p>Hi</p>','',true,'ko'),/<title>Markdown 문서<\/title>/);
+ assert.match(htmlDocument('<p>Hi</p>','',true,'en'),/<title>Markdown Document<\/title>/);
+ assert.match(htmlDocument('<p>Hi</p>','',true,'ja'),/<title>マークダウン文書<\/title>/);
+ assert.equal(sanitizeFilename('2026: Q4/보고서?'), '2026_ Q4_보고서_');
+ assert.equal(sanitizeFilename('   ...   ','document'),'document');
 });

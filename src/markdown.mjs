@@ -44,7 +44,19 @@ export function createMarkdownConverter(windowObject){
   return purify.sanitize(raw,{ALLOWED_TAGS:['h1','h2','h3','h4','h5','h6','p','br','hr','strong','b','em','i','del','s','blockquote','ul','ol','li','pre','code','a','img','table','thead','tbody','tfoot','tr','th','td','input','sup','sub','dl','dt','dd','details','summary','kbd'],ALLOWED_ATTR:['href','src','alt','title','class','start','reversed','colspan','rowspan','align','type','checked','disabled','open'],ALLOW_DATA_ATTR:false,ALLOW_ARIA_ATTR:false});
  };
 }
-export function htmlDocument(body,title='Markdown 문서',images=true,lang='ko'){const safeLang=['ko','en','ja'].includes(lang)?lang:'ko';const policy="default-src 'none'; style-src 'unsafe-inline'; img-src "+(images?"https: http: data:":"data:")+"; base-uri 'none'; form-action 'none';";return '<!doctype html>\n<html lang="'+safeLang+'">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta http-equiv="Content-Security-Policy" content="'+escapeHTML(policy)+'">\n<meta name="referrer" content="no-referrer">\n<title>'+escapeHTML(title)+'</title>\n<style>'+documentStyle+'</style>\n</head>\n<body>\n<main>\n'+body+'\n</main>\n</body>\n</html>\n'}
+export const DEFAULT_DOCUMENT_TITLES={ko:'Markdown 문서',en:'Markdown Document',ja:'マークダウン文書'};
+export function defaultDocumentTitle(lang='ko'){return DEFAULT_DOCUMENT_TITLES[lang]||DEFAULT_DOCUMENT_TITLES.ko}
+export function extractDocumentTitle(body,windowObject){
+ if(!body||!windowObject)return '';
+ const doc=new windowObject.DOMParser().parseFromString(body,'text/html');
+ const h1=Array.from(doc.body.children).find(el=>el.tagName==='H1');
+ return h1?h1.textContent.replace(/\s+/g,' ').trim().slice(0,160).trim():'';
+}
+export function sanitizeFilename(name,fallback='document'){
+ const cleaned=String(name??'').replace(/[<>:"/\\|?*\u0000-\u001f]/g,'_').replace(/\s+/g,' ').replace(/^[.\s]+|[.\s]+$/g,'').slice(0,100).trim();
+ return cleaned||fallback;
+}
+export function htmlDocument(body,title='',images=true,lang='ko'){const safeLang=['ko','en','ja'].includes(lang)?lang:'ko';const resolvedTitle=String(title??'').trim()||defaultDocumentTitle(safeLang);const policy="default-src 'none'; style-src 'unsafe-inline'; img-src "+(images?"https: http: data:":"data:")+"; base-uri 'none'; form-action 'none';";return '<!doctype html>\n<html lang="'+safeLang+'">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta http-equiv="Content-Security-Policy" content="'+escapeHTML(policy)+'">\n<meta name="referrer" content="no-referrer">\n<title>'+escapeHTML(resolvedTitle)+'</title>\n<style>'+documentStyle+'</style>\n</head>\n<body>\n<main>\n'+body+'\n</main>\n</body>\n</html>\n'}
 
 // Walk a detached, sanitized document. Never fetch images or execute source HTML.
 export function plainTextFromHTML(body,windowObject){
