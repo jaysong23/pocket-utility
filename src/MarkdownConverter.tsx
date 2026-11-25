@@ -1,13 +1,14 @@
-import { t as tr, locale, getLanguage } from "./i18n.mjs";
+import { t as tr, languages, getLanguage } from "./i18n.mjs";
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Copy, Download, Upload, FileCode2 } from 'lucide-react';
 import { createMarkdownConverter, htmlDocument, plainTextFromHTML, defaultDocumentTitle, extractDocumentTitle, sanitizeFilename, MAX_MARKDOWN } from './markdown.mjs';
 const fence = String.fromCharCode(96).repeat(3);
-const sampleText = () => tr('# 마크다운을 HTML로\n\n문서를 **간편하게** 작성하고 웹페이지로 저장하세요.\n\n## 할 일\n\n- [x] 마크다운 입력하기\n- [ ] HTML로 저장하기\n\n## 표\n\n| 도구 | 기능 |\n| --- | --- |\n| MY POCKET UTILITY | 일상 도구 모음 |\n| MD → HTML | 문서 변환 |\n\n> 표, 체크리스트, 인용문, 코드블록을 지원합니다.\n\n') + fence + 'javascript\nconst message = "Hello, MY POCKET UTILITY!";\nconsole.log(message);\n' + fence + tr('\n\n[링크 예시](https://example.com)\n');
+const sampleText = (lang = getLanguage()) => tr('# 마크다운을 HTML로\n\n문서를 **간편하게** 작성하고 웹페이지로 저장하세요.\n\n## 할 일\n\n- [x] 마크다운 입력하기\n- [ ] HTML로 저장하기\n\n## 표\n\n| 도구 | 기능 |\n| --- | --- |\n| MY POCKET UTILITY | 일상 도구 모음 |\n| MD → HTML | 문서 변환 |\n\n> 표, 체크리스트, 인용문, 코드블록을 지원합니다.\n\n', lang) + fence + 'javascript\nconst message = "Hello, MY POCKET UTILITY!";\nconsole.log(message);\n' + fence + tr('\n\n[링크 예시](https://example.com)\n', lang);
+const builtinSamples = new Set(languages.map(l => sampleText(l)));
 export default function MarkdownConverter() {
   const lang = getLanguage();
-  const [input, setInput] = useState(sampleText),
-    [settled, setSettled] = useState(sampleText),
+  const [input, setInput] = useState(() => sampleText(lang)),
+    [settled, setSettled] = useState(() => sampleText(lang)),
     [tab, setTab] = useState('preview'),
     [mode, setMode] = useState('document'),
     [title, setTitle] = useState(''),
@@ -19,6 +20,15 @@ export default function MarkdownConverter() {
   useEffect(() => () => {
     fileRead.current++;
   }, []);
+  useEffect(() => {
+    if (builtinSamples.has(input)) {
+      const next = sampleText(lang);
+      if (input !== next) {
+        setInput(next);
+        setSettled(next);
+      }
+    }
+  }, [lang]);
   useEffect(() => {
     const t = setTimeout(() => setSettled(input), 180);
     return () => clearTimeout(t);

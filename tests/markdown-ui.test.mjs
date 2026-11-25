@@ -53,3 +53,35 @@ test('Markdown page title follows first H1, custom override, and localized defau
   });
  }
 });
+test('language switch updates untouched sample text and title, but preserves user edits',async()=>{
+ const dom=new JSDOM('<meta name="site-base" content="/"><div id="root"></div>',{url:'https://example.com/markdown/'});
+ const old={};for(const key of ['window','document','history','location','HTMLElement','HTMLInputElement','HTMLTextAreaElement','Event','DOMParser']){old[key]=globalThis[key];globalThis[key]=dom.window[key]}
+ globalThis.IS_REACT_ACT_ENVIRONMENT=true;
+ const {createRoot}=await import('react-dom/client');
+ const {default:Component}=await import('../node_modules/.cache/markdown-ui/component.mjs');
+ const root=createRoot(document.querySelector('#root'));
+ try{
+  await act(async()=>root.render(React.createElement(Component)));
+  assert.equal(document.querySelectorAll('.md-options input')[0].placeholder,'마크다운을 HTML로');
+  dom.window.history.replaceState({},'','/en/markdown/');
+  await act(async()=>root.render(React.createElement(Component)));
+  assert.match(document.querySelector('.md-source').value,/^# Markdown converter/);
+  assert.equal(document.querySelectorAll('.md-options input')[0].placeholder,'Markdown converter');
+
+  const ta=document.querySelector('.md-source');
+  Object.getOwnPropertyDescriptor(dom.window.HTMLTextAreaElement.prototype,'value').set.call(ta,'# 내가 작성한 문서\n\n내용');
+  await act(async()=>{ta.dispatchEvent(new Event('input',{bubbles:true}))});
+  await act(async()=>new Promise(r=>setTimeout(r,220)));
+  assert.equal(document.querySelectorAll('.md-options input')[0].placeholder,'내가 작성한 문서');
+
+  dom.window.history.replaceState({},'','/ja/markdown/');
+  await act(async()=>root.render(React.createElement(Component)));
+  assert.equal(document.querySelector('.md-source').value,'# 내가 작성한 문서\n\n내용');
+  assert.equal(document.querySelectorAll('.md-options input')[0].placeholder,'내가 작성한 문서');
+ }finally{
+  await act(async()=>root.unmount());
+  delete globalThis.IS_REACT_ACT_ENVIRONMENT;
+  for(const key of Object.keys(old)){if(old[key]===undefined)delete globalThis[key];else globalThis[key]=old[key]}
+  dom.window.close();
+ }
+});

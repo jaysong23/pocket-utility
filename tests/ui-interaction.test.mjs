@@ -18,14 +18,15 @@ test('language and category navigation preserve input; plain-text copy uses actu
  globalThis.IS_REACT_ACT_ENVIRONMENT=true;window.scrollTo=()=>{};const root=createRoot(document.getElementById('root'));
  try{
   await act(async()=>root.render(React.createElement(App)));
-  const original=document.querySelector('.md-source').value;
   const mdInputs=()=>document.querySelectorAll('.md-options input');
   assert.equal(mdInputs()[0].placeholder,'마크다운을 HTML로');
   assert.equal(mdInputs()[1].placeholder,'마크다운을 HTML로');
   await act(async()=>{const select=document.querySelector('.language-switch select');select.value='en';select.dispatchEvent(new Event('change',{bubbles:true}))});
-  assert.equal(location.pathname,'/pocket-utility/en/markdown/');assert.equal(document.documentElement.lang,'en');assert.equal(document.querySelector('.md-source').value,original);assert.match(document.title,/Markdown converter/);
+  assert.equal(location.pathname,'/pocket-utility/en/markdown/');assert.equal(document.documentElement.lang,'en');assert.match(document.querySelector('.md-source').value,/^# Markdown converter/);assert.match(document.title,/Markdown converter/);
+  assert.equal(mdInputs()[0].placeholder,'Markdown converter');
+  assert.equal(mdInputs()[1].placeholder,'Markdown converter');
   await act(async()=>{const viewButtons=document.querySelectorAll('.md-view-tabs button');viewButtons[1].click()});
-  assert.match(document.querySelector('.md-output').value,/<title>마크다운을 HTML로<\/title>/);
+  assert.match(document.querySelector('.md-output').value,/<title>Markdown converter<\/title>/);
   await act(async()=>{const select=document.querySelector('.md-options select');select.value='plain';select.dispatchEvent(new Event('change',{bubbles:true}))});
   assert.ok(document.querySelector('.md-output'));assert.equal(document.querySelectorAll('.md-preview').length,0);
   const text=document.querySelector('.md-output').value;assert.ok(text);assert.doesNotMatch(text,/<h1>|\*\*/);
