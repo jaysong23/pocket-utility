@@ -167,3 +167,35 @@ html[data-theme=dark] .site-footer{background:#252331}html[data-theme=dark] .foo
 
 /* Upload instructions stay centered independently of page headings. */
 .shell .converter .dropzone h2{text-align:center;margin-left:auto;margin-right:auto}
+
+/* Pixel & mm DPI converter */
+.dpi-controls{margin:0 0 22px}
+.dpi-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;font-size:12px;font-weight:600;color:#8a729d}
+.dpi-custom{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:500;color:var(--muted)}
+.dpi-custom input{width:92px;padding:7px 10px;border:1px solid #c6b8d5;border-radius:7px;background:#faf8fc;color:#51435d;font:inherit;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.dpi-custom em{font-style:normal;font-size:11px;font-weight:700;color:#8a729d}
+.dpi-presets{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.dpi-presets button{text-align:left;padding:10px 11px;border:1px solid #d8d0e4;border-radius:9px;background:#faf8fc;color:#51435d}
+.dpi-presets button b{display:block;font-size:13px;font-variant-numeric:tabular-nums}
+.dpi-presets button small{display:block;font-size:10px;color:#8a729d;margin-top:4px;line-height:1.35}
+.dpi-presets button.active{background:#ebe2fa;border-color:#9e82c8;color:#5e3e8e}
+.px-rounded{font-style:normal;font-size:18px;font-weight:500;margin-left:10px;opacity:.78}
+.dpi-compare{margin-top:24px;padding-top:22px;border-top:1px solid #e6dff0}
+.dpi-compare h2{font-size:15px;margin:0 0 6px;color:#51435d}
+.dpi-compare>p{font-size:12px;color:var(--muted);margin:0 0 14px}
+.dpi-list{display:grid;gap:8px}
+.dpi-row{display:flex;justify-content:space-between;align-items:center;gap:14px;width:100%;text-align:left;padding:13px 16px;border:1px solid #e3dce9;border-radius:10px;background:#faf8fc;color:#3c3448}
+.dpi-row:hover{border-color:#a78cce}
+.dpi-row.active{background:#f0eafb;border-color:#9e82c8;color:#5e3e8e}
+.dpi-meta b{display:inline-block;min-width:66px;font-size:13px;font-variant-numeric:tabular-nums}
+.dpi-meta small{color:var(--muted);font-size:12px;margin-left:6px}
+.dpi-val{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.dpi-val strong{font-size:15px;font-weight:700}
+.dpi-val small{display:inline-block;margin-left:6px;font-size:12px;color:var(--muted)}
+[data-theme=dark] .dpi-head,[data-theme=dark] .dpi-custom em,[data-theme=dark] .dpi-presets button small{color:#b8a8c8}
+[data-theme=dark] .dpi-custom input,[data-theme=dark] .dpi-presets button,[data-theme=dark] .dpi-row{background:#292735;border-color:#5a4d68;color:#e0d3ed}
+[data-theme=dark] .dpi-presets button.active,[data-theme=dark] .dpi-row.active{background:#3d314e;border-color:#ae8dce;color:#e4d3f8}
+[data-theme=dark] .dpi-compare{border-color:#4b4158}
+[data-theme=dark] .dpi-compare h2{color:#e2dbea}
+@media(max-width:720px){.dpi-presets{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.dpi-row{flex-direction:column;align-items:flex-start;gap:6px;padding:12px}.dpi-val{text-align:left}.px-rounded{font-size:14px;margin-left:6px}}

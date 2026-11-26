@@ -12,7 +12,7 @@ site.pathname=site.pathname.replace(/\/?$/,'/');const base=site.pathname;
 await rm('dist',{recursive:true,force:true});await mkdir('dist',{recursive:true});
 await build({entryPoints:['src/main.tsx'],bundle:true,minify:true,jsx:'automatic',define:{'process.env.NODE_ENV':'"production"'},outdir:'dist',entryNames:'entry'});
 const template=await readFile('index.html','utf8'),routes=['',...Object.keys(guides),...Object.keys(infoPages)];
-const categorySets=[['이미지',['webp','heic','pdf-to-jpg']],['날짜·시간',['weeknumber','clock','timer','pomodoro']],['텍스트·경로',['path-converter','symbols','insta-fonts','markdown','url-linter','url-expander','character-counter','lorem-ipsum']],['계산·변환',['currency','units']]];
+const categorySets=[['이미지',['webp','heic','pdf-to-jpg']],['날짜·시간',['weeknumber','clock','timer','pomodoro']],['텍스트·경로',['path-converter','symbols','insta-fonts','markdown','url-linter','url-expander','character-counter','lorem-ipsum']],['계산·변환',['currency','units','pixel-converter']]];
 for(const lang of languages)for(const route of routes){
  const m=pageMeta(route,lang,site),href=id=>base+pagePath(id,lang),info=infoPage(route,lang),g=guides[route]||(info?[info.title,info.description]:null);
  const nav='<nav class="category-nav" aria-label="'+esc(t('주요 메뉴',lang))+'"><a href="'+href('')+'">'+esc(t('모든 도구',lang))+'</a>'+categorySets.map(([cat,ids])=>'<details><summary>'+esc(t(cat,lang))+'</summary><div class="category-dropdown">'+ids.map(id=>'<a href="'+href(id)+'">'+esc(t(guides[id][0],lang))+'</a>').join('')+'</div></details>').join('')+'</nav>';

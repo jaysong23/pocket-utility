@@ -15,7 +15,7 @@ test('legacy bookmarks preserve routes and query separation',()=>{
  assert.equal(readRoute({hash:'#/',pathname:'/pocket-utility/'},'/pocket-utility/'),'home');
 });
 test('every tool has readable instructions, examples and FAQ',()=>{
- assert.equal(Object.keys(guides).length,17);
+ assert.equal(Object.keys(guides).length,18);
  for(const [id,g] of Object.entries(guides)){assert.equal(g[2].length,3);assert.ok(guideHTML(id).includes('<details>'));assert.ok(g[3].length>20);assert.ok(g[5].length>30)}
  assert.equal(guideHTML('unknown'),'');
 });

@@ -55,7 +55,7 @@ test('language and category navigation preserve input; plain-text copy uses actu
   assert.equal(document.querySelectorAll('.tool-tile').length,0);
   assert.ok(document.querySelector('.no-results button'));
   await act(async()=>document.querySelector('.no-results button').click());
-  assert.equal(document.querySelectorAll('.tool-tile').length,17);
+  assert.equal(document.querySelectorAll('.tool-tile').length,18);
   await act(async()=>document.querySelector('.recent-strip>button').click());
   assert.equal(document.querySelector('.recent-strip'),null);
   await act(async()=>window.dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'k',ctrlKey:true,bubbles:true})));

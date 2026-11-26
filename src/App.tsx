@@ -11,11 +11,12 @@ import { t as tr, locale, getLanguage } from "./i18n.mjs";
 import { guides, guideHTML } from './guides.mjs';
 import { getRoute, getQuery, routeHref, siteBase, navigate, installRouting } from './routing.mjs';
 import { useEffect, useState } from 'react';
-import { ArrowRight, ArrowUpRight, ArrowLeft, Search, Image, CalendarDays, Smartphone, ChevronLeft, ChevronRight, Copy, Check, Command, FolderSync, Moon, Sun, Type, Shapes, Coins, Ruler, FileImage, Timer, FileCode2 } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, ArrowLeft, Search, Image, CalendarDays, Smartphone, ChevronLeft, ChevronRight, Copy, Check, Command, FolderSync, Moon, Sun, Type, Shapes, Coins, Ruler, Maximize2, FileImage, Timer, FileCode2 } from 'lucide-react';
 import Converter from './Converter';
 import PathConverter from './PathConverter';
 import { Symbols, InstaFonts } from './TextTools';
 import { CurrencyConverter, UnitConverter } from './Calculators';
+import PixelConverter from './PixelConverter';
 import PdfConverter from './PdfConverter';
 import MarkdownConverter from './MarkdownConverter';
 import ClockTimer from './ClockTimer';
@@ -105,6 +106,15 @@ const tools = [{id:'lorem-ipsum',name:'Lorem ipsum 생성기',english:'LOREM IPS
   Icon: Ruler,
   color: 'blue',
   tags: ['9개 분야', '즉시 계산']
+}, {
+  id: 'pixel-converter',
+  name: '픽셀·mm 변환',
+  english: 'PIXEL / MM CONVERTER',
+  category: '계산·변환',
+  text: 'mm·cm·인치와 픽셀(px)을 DPI 기준으로 변환하세요.\n72~600 DPI 품질별 결과를 한눈에 비교합니다.',
+  Icon: Maximize2,
+  color: 'purple',
+  tags: ['mm ↔ px', '72~600 DPI']
 }, {
   id: 'pdf-to-jpg',
   name: 'PDF → JPG',
@@ -251,7 +261,7 @@ export default function App() {
   }, []);
 
   const selected = tools.find(t => t.id === route);
-  return <div className="site"><Navigation route={route} language={language}/><main className="shell" id="main-content">{tr(route === 'home' ? <ToolDirectory tools={tools}/> : infoPages[route] ? <InfoPage key={route} id={route}/> : selected ? <><nav className="breadcrumbs" aria-label={tr("탐색 경로")}><a href={routeHref()}>{tr("모든 도구")}</a><span aria-hidden="true">/</span><span aria-current="page">{tr(selected.name)}</span><FavoriteButton id={selected.id}/></nav>{tr(route === 'url-expander' ? <UrlExpander /> : route === 'character-counter' ? <CharacterCounter /> : route === 'lorem-ipsum' ? <LoremGenerator /> : route === 'url-linter' ? <UrlLinter /> : route === 'markdown' ? <MarkdownConverter /> : route === 'weeknumber' ? <WeekNumber query={query} /> : route === 'path-converter' ? <PathConverter /> : route === 'symbols' ? <Symbols /> : route === 'insta-fonts' ? <InstaFonts /> : route === 'currency' ? <CurrencyConverter /> : route === 'units' ? <UnitConverter /> : route === 'pdf-to-jpg' ? <PdfConverter /> : ['clock','timer','pomodoro'].includes(route) ? null : <><div className="tool-heading"><span className="eyebrow">{tr("IMAGE CONVERTER")}</span><h1>{tr("이미지 변환")}</h1><p>{tr("AVIF·HEIC·WebP·JPG·PNG 이미지를 원하는 형식으로 변환하세요.")}</p></div><Converter kind={route as 'webp' | 'heic'} key={route} /></>)}</> : <div className="no-results"><h1>{tr("도구를 찾을 수 없어요.")}</h1><a href={routeHref()}>{tr("모든 도구로 돌아가기")}</a></div>)}<div hidden={!['clock','timer','pomodoro'].includes(route)}><ClockTimer mode={['clock','timer','pomodoro'].includes(route)?route:'clock'} showHeading={['clock','timer','pomodoro'].includes(route)}/></div>{tr(guides[route] && <div dangerouslySetInnerHTML={{
+  return <div className="site"><Navigation route={route} language={language}/><main className="shell" id="main-content">{tr(route === 'home' ? <ToolDirectory tools={tools}/> : infoPages[route] ? <InfoPage key={route} id={route}/> : selected ? <><nav className="breadcrumbs" aria-label={tr("탐색 경로")}><a href={routeHref()}>{tr("모든 도구")}</a><span aria-hidden="true">/</span><span aria-current="page">{tr(selected.name)}</span><FavoriteButton id={selected.id}/></nav>{tr(route === 'url-expander' ? <UrlExpander /> : route === 'character-counter' ? <CharacterCounter /> : route === 'lorem-ipsum' ? <LoremGenerator /> : route === 'url-linter' ? <UrlLinter /> : route === 'markdown' ? <MarkdownConverter /> : route === 'weeknumber' ? <WeekNumber query={query} /> : route === 'path-converter' ? <PathConverter /> : route === 'symbols' ? <Symbols /> : route === 'insta-fonts' ? <InstaFonts /> : route === 'currency' ? <CurrencyConverter /> : route === 'units' ? <UnitConverter /> : route === 'pixel-converter' ? <PixelConverter /> : route === 'pdf-to-jpg' ? <PdfConverter /> : ['clock','timer','pomodoro'].includes(route) ? null : <><div className="tool-heading"><span className="eyebrow">{tr("IMAGE CONVERTER")}</span><h1>{tr("이미지 변환")}</h1><p>{tr("AVIF·HEIC·WebP·JPG·PNG 이미지를 원하는 형식으로 변환하세요.")}</p></div><Converter kind={route as 'webp' | 'heic'} key={route} /></>)}</> : <div className="no-results"><h1>{tr("도구를 찾을 수 없어요.")}</h1><a href={routeHref()}>{tr("모든 도구로 돌아가기")}</a></div>)}<div hidden={!['clock','timer','pomodoro'].includes(route)}><ClockTimer mode={['clock','timer','pomodoro'].includes(route)?route:'clock'} showHeading={['clock','timer','pomodoro'].includes(route)}/></div>{tr(guides[route] && <div dangerouslySetInnerHTML={{
         __html: guideHTML(route,language)
       }} />)}{selected&&<section className="related-tools"><h2>{tr("관련 도구")}</h2><div>{tools.filter(tool=>tool.category===selected.category&&tool.id!==route).map(tool=><a key={tool.id} href={routeHref(tool.id)}>{tr(tool.name)}</a>)}</div></section>}</main><SiteFooter language={language}/></div>;
 }

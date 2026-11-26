@@ -7,7 +7,7 @@ import {JSDOM} from 'jsdom';
 import {guides} from '../src/guides.mjs';
 import {t} from '../src/i18n.mjs';
 import {pagePath} from '../src/seo.mjs';
-test('63 localized static pages have unique metadata, semantic content and share images',()=>{
+test('66 localized static pages have unique metadata, semantic content and share images',()=>{
  for(const site of ['https://example.com/','https://jaysong23.github.io/pocket-utility/']){
   execFileSync(process.execPath,['scripts/build.mjs'],{env:{...process.env,SITE_URL:site}});
   const version=JSON.parse(readFileSync('dist/version.json','utf8'));assert.match(version.commit,/^[a-f0-9]{40}$/);assert.ok(Number.isFinite(Date.parse(version.builtAt)));
@@ -26,7 +26,7 @@ test('63 localized static pages have unique metadata, semantic content and share
    if(lang!=='ko'){assert.doesNotMatch(d.querySelector('main').textContent,/[가-힣]/)}
    assert.ok(html.includes('src="'+new URL(site).pathname+'entry.js"'));dom.window.close();
   }
-  assert.equal(canonicals.size,63);const sitemap=readFileSync('dist/sitemap.xml','utf8');assert.equal((sitemap.match(/<loc>/g)||[]).length,63);assert.ok(!sitemap.includes('#/'));assert.ok(!sitemap.includes('md-to-html'));
+  assert.equal(canonicals.size,66);const sitemap=readFileSync('dist/sitemap.xml','utf8');assert.equal((sitemap.match(/<loc>/g)||[]).length,66);assert.ok(!sitemap.includes('#/'));assert.ok(!sitemap.includes('md-to-html'));
   assert.ok(readFileSync('dist/md-to-html/index.html','utf8').includes('href="'+site+'markdown/"'));
   for(const [lang,title] of [['ko','위크넘버 계산기'],['en','Week number calculator'],['ja','週番号計算ツール']]){
    const wdom=new JSDOM(readFileSync('dist/'+pagePath('weeknumber',lang)+'index.html','utf8'));const wd=wdom.window.document;

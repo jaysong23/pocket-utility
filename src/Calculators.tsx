@@ -1,4 +1,5 @@
 import { t as tr, locale, getLanguage } from "./i18n.mjs";
+import { routeHref } from './routing.mjs';
 import { useEffect, useState } from 'react';
 import { ArrowLeftRight, Copy, RefreshCw } from 'lucide-react';
 import { units, convertUnit, parseAmount, formatValue, exchange } from './measure.mjs';
@@ -43,7 +44,7 @@ export function UnitConverter() {
       }}>{tr(c)}</button>))}</div><section className="calc-workspace"><label className="calc-amount">{tr("변환할 값")}<input inputMode="decimal" value={amount} onChange={e => setAmount(e.target.value)} placeholder={tr("숫자 입력")} /></label><div className="calc-pair"><label>FROM<select value={from} onChange={e => setFrom(e.target.value)}>{tr(list.map(u => <option key={u[0]} value={u[0]}>{tr(u[1])} ({tr(u[0])})</option>))}</select></label><button className="calc-swap" aria-label={tr("단위 서로 바꾸기")} onClick={() => {
           setFrom(to);
           setTo(from);
-        }}><ArrowLeftRight size={20} /></button><label>TO<select value={to} onChange={e => setTo(e.target.value)}>{tr(list.map(u => <option key={u[0]} value={u[0]}>{tr(u[1])} ({tr(u[0])})</option>))}</select></label></div><Result value={value} unit={to} error={error} /></section><p className="text-tool-note">{tr(category === '데이터' ? 'KB·MB·GB는 1000 기준, KiB·MiB·GiB는 1024 기준입니다.' : category === '부피' ? '미국 갤런과 영국 갤런, 액량 온스는 서로 다른 단위입니다.' : category === '무게' ? '온스(oz)는 무게 단위이며 액량 온스(fl oz)와 다릅니다.' : '입력한 값은 기기 안에서 계산됩니다. 결과는 최대 12자리 유효숫자로 표시합니다.')}</p></>;
+        }}><ArrowLeftRight size={20} /></button><label>TO<select value={to} onChange={e => setTo(e.target.value)}>{tr(list.map(u => <option key={u[0]} value={u[0]}>{tr(u[1])} ({tr(u[0])})</option>))}</select></label></div><Result value={value} unit={to} error={error} /></section><p className="text-tool-note">{category === '길이' ? <>{tr('픽셀(px)과 mm 변환은 ')}<a href={routeHref('pixel-converter')}>{tr('픽셀·mm 변환')}</a>{tr('에서 계산할 수 있어요.')}{' '}</> : null}{tr(category === '데이터' ? 'KB·MB·GB는 1000 기준, KiB·MiB·GiB는 1024 기준입니다.' : category === '부피' ? '미국 갤런과 영국 갤런, 액량 온스는 서로 다른 단위입니다.' : category === '무게' ? '온스(oz)는 무게 단위이며 액량 온스(fl oz)와 다릅니다.' : '입력한 값은 기기 안에서 계산됩니다. 결과는 최대 12자리 유효숫자로 표시합니다.')}</p></>;
 }
 const currencies = [['KRW', '대한민국 원'], ['USD', '미국 달러'], ['JPY', '일본 엔'], ['EUR', '유로'], ['CNY', '중국 위안'], ['GBP', '영국 파운드'], ['HKD', '홍콩 달러'], ['TWD', '대만 달러'], ['AUD', '호주 달러'], ['CAD', '캐나다 달러'], ['CHF', '스위스 프랑'], ['SGD', '싱가포르 달러'], ['THB', '태국 바트'], ['NZD', '뉴질랜드 달러'], ['IDR', '인도네시아 루피아'], ['INR', '인도 루피']].filter(c => c[0] !== 'TWD');
 export function CurrencyConverter() {
